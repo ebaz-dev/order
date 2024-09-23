@@ -1,29 +1,25 @@
 import { Document, Schema, Types, model } from "mongoose";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
-
-export enum OrderStatus {
+export enum CartStatus {
   Created = "created",
   Pending = "pending",
-  Confirmed = "confirmed",
-  Delivered = "delivered",
+  Ordered = "ordered",
   Cancelled = "cancelled",
 }
 
-interface OrderProductDoc extends Document {
+interface CartProductDoc extends Document {
   id: Types.ObjectId;
-  unitPrice: number;
   quantity: number;
+  name: string;
+  price: number;
+  totalPrice: number;
 }
-const orderProductSchema = new Schema<OrderProductDoc>(
+const cartProductSchema = new Schema<CartProductDoc>(
   {
     id: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: "Product",
-    },
-    unitPrice: {
-      type: Number,
-      required: true,
     },
     quantity: {
       type: Number,
@@ -33,20 +29,18 @@ const orderProductSchema = new Schema<OrderProductDoc>(
   { _id: false }
 );
 
-interface OrderDoc extends Document {
-  status: OrderStatus;
+interface CartDoc extends Document {
+  status: CartStatus;
   supplierId: Types.ObjectId;
   merchantId: Types.ObjectId;
   userId: Types.ObjectId;
-  cartId: Types.ObjectId;
-  products: OrderProductDoc[];
+  products: CartProductDoc[];
   orderedAt: Date;
-  deliveryDate: Date;
 }
 
-const orderSchema = new Schema<OrderDoc>(
+const cartSchema = new Schema<CartDoc>(
   {
-    status: { type: String, enum: Object.values(OrderStatus), required: true },
+    status: { type: String, enum: Object.values(CartStatus), required: true },
     supplierId: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -62,14 +56,8 @@ const orderSchema = new Schema<OrderDoc>(
       required: false,
       ref: "User",
     },
-    cartId: {
-      type: Schema.Types.ObjectId,
-      required: false,
-      ref: "Cart",
-    },
-    products: [orderProductSchema],
+    products: [cartProductSchema],
     orderedAt: Date,
-    deliveryDate: Date
   },
   {
     timestamps: true,
@@ -82,9 +70,9 @@ const orderSchema = new Schema<OrderDoc>(
   }
 );
 
-orderSchema.set("versionKey", "version");
-orderSchema.plugin(updateIfCurrentPlugin);
+cartSchema.set("versionKey", "version");
+cartSchema.plugin(updateIfCurrentPlugin);
 
-const Order = model<OrderDoc>("Order", orderSchema);
+const Cart = model<CartDoc>("Cart", cartSchema);
 
-export { OrderDoc, Order };
+export { CartDoc, Cart, CartProductDoc };

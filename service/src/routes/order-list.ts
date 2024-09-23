@@ -1,25 +1,15 @@
 import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
-import { Cart, CartStatus } from "../shared";
-import { query } from "express-validator";
+import { Order } from "../shared";
 
 const router = express.Router();
 
 router.get(
-  "/cart/list",
-  [
-    query("merchantId")
-      .notEmpty()
-      .isString()
-      .withMessage("Merchant ID is required"),
-  ],
+  "/order/list",
   validateRequest,
   async (req: Request, res: Response) => {
     const criteria: any = {
-      products: { $exists: true, $ne: [] },
-      merchantId: req.query.merchantId,
-      status: CartStatus.Created,
     };
     if (req.query.supplierId) {
       criteria.supplierId = req.query.supplierId;
@@ -30,10 +20,13 @@ router.get(
     if (req.query.userId) {
       criteria.userId = req.query.userId;
     }
-    const carts = await Cart.find(criteria);
+    if (req.query.status) {
+      criteria.status = req.query.status;
+    }
+    const orders = await Order.find(criteria);
 
-    res.status(StatusCodes.OK).send(carts);
+    res.status(StatusCodes.OK).send(orders);
   }
 );
 
-export { router as cartListRouter };
+export { router as orderListRouter };

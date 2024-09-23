@@ -5,3 +5,7 @@ export * from "./events/cart-product-add-event";
 export * from "./events/cart-product-remove-event";
 
 export * from "./models/cart";
+
+export * from "./events/order-create-event";
+
+export * from "./models/order";

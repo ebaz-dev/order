@@ -56,4 +56,4 @@ global.signin = () => {
   return [`session=${base64}`];
 };
 
-global.apiPrefix = "/api/v1/cart";
+global.apiPrefix = "/api/v1/order";

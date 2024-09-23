@@ -15,7 +15,7 @@ import { CartConfirmedPublisher } from "../events/publisher/cart-confirmed-publi
 const router = express.Router();
 
 router.post(
-  "/confirm",
+  "/cart/confirm",
   [body("id").notEmpty().isString().withMessage("Cart ID is required")],
   validateRequest,
   async (req: Request, res: Response) => {

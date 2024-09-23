@@ -15,7 +15,7 @@ import { CartProductRemovedPublisher } from "../events/publisher/cart-product-re
 const router = express.Router();
 
 router.post(
-  "/product/remove",
+  "/cart/product/remove",
   [
     body("id").notEmpty().isString().withMessage("Cart ID is required"),
     body("productId")
