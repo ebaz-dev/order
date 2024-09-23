@@ -23,7 +23,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@ebazdev/core": "^1.0.3",
+    "@ebazdev/core": "^1.0.14",
     "@ebazdev/customer": "^1.0.7",
     "@ebazdev/inventory": "^1.0.9",
     "@ebazdev/product": "^1.0.26",
