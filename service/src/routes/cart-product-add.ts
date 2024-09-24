@@ -31,7 +31,7 @@ router.post(
       .isString()
       .withMessage("Product ID is required"),
     body("quantity").notEmpty().isNumeric().withMessage("Quantity is required"),
-  ],
+  ], currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
@@ -44,12 +44,12 @@ router.post(
         cart = await Cart.findOne({
           supplierId: data.supplierId,
           merchantId: data.merchantId,
+          userId: req.currentUser?.id,
           status: CartStatus.Created,
         });
         console.log("cart", cart);
         const product = _.first(
           _.filter(cart?.products, (p) => {
-            console.log("pp", p.id.toString() === data.productId);
             return p.id.toString() === data.productId;
           })
         );
@@ -57,30 +57,31 @@ router.post(
         exists.product = !!product;
         const quantity = (product?.quantity || 0) + data.quantity;
         exists.remove = quantity <= 0 ? true : false;
-      } catch (error) {}
+      } catch (error) { }
       console.log("exists", exists);
       if (!!exists.cart) {
         await Cart.updateOne(
           {
             supplierId: data.supplierId,
             merchantId: data.merchantId,
+            userId: req.currentUser?.id,
             status: CartStatus.Created,
           },
           !!exists.remove
             ? {
-                $pull: {
-                  products: {
-                    id: data.productId,
-                  },
+              $pull: {
+                products: {
+                  id: data.productId,
                 },
-              }
+              },
+            }
             : !!exists.product
-            ? {
+              ? {
                 $inc: {
                   "products.$[p].quantity": data.quantity,
                 },
               }
-            : {
+              : {
                 $push: {
                   products: {
                     id: data.productId,
@@ -90,9 +91,9 @@ router.post(
               },
           !!exists.product
             ? {
-                arrayFilters: [{ "p.id": data.productId }],
-                upsert: true,
-              }
+              arrayFilters: [{ "p.id": data.productId }],
+              upsert: true,
+            }
             : {}
         );
       } else {
@@ -100,6 +101,7 @@ router.post(
           status: CartStatus.Created,
           supplierId: data.supplierId,
           merchantId: data.merchantId,
+          userId: req.currentUser?.id,
           products: [{ id: data.productId, quantity: data.quantity }],
         });
       }

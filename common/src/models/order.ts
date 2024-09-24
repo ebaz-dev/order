@@ -11,7 +11,9 @@ export enum OrderStatus {
 
 interface OrderProductDoc extends Document {
   id: Types.ObjectId;
-  unitPrice: number;
+  name: string;
+  images: string[];
+  price: number;
   quantity: number;
 }
 const orderProductSchema = new Schema<OrderProductDoc>(
@@ -21,7 +23,15 @@ const orderProductSchema = new Schema<OrderProductDoc>(
       required: true,
       ref: "Product",
     },
-    unitPrice: {
+    name: {
+      type: String,
+      required: true,
+    },
+    images: [{
+      type: String,
+      required: false,
+    },],
+    price: {
       type: Number,
       required: true,
     },

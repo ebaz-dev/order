@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { app } from "./app";
 import { natsWrapper } from "./nats-wrapper";
+import { CartInventoryCheckedListener } from "./events/listener/inventory-checked-listener";
 
 const start = async () => {
   if (!process.env.PORT) {
@@ -39,6 +40,9 @@ const start = async () => {
     });
     process.on("SIGINT", () => natsWrapper.client.close());
     process.on("SIGTERM", () => natsWrapper.client.close());
+
+    new CartInventoryCheckedListener(natsWrapper.client).listen();
+
 
     await mongoose.connect(process.env.MONGO_URI);
     console.log("Connected to DB");

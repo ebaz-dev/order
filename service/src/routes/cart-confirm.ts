@@ -17,6 +17,7 @@ const router = express.Router();
 router.post(
   "/cart/confirm",
   [body("id").notEmpty().isString().withMessage("Cart ID is required")],
+  [body("deliveryDate").notEmpty().isString().withMessage("Delivery date is required")],
   validateRequest,
   async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
@@ -29,6 +30,7 @@ router.post(
       await Cart.updateOne(
         { _id: req.body.id },
         {
+          deliveryDate: req.body.deliveryDate,
           status: CartStatus.Pending,
         }
       );
