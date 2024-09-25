@@ -15,10 +15,18 @@ router.get(
   currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const cart = await Cart.findOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: CartStatus.Created });
-    if (cart) {
-      const data = await prepareCart(cart);
-      res.status(StatusCodes.OK).send({ data });
+    try {
+
+      const cart = await Cart.findOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: CartStatus.Created });
+      if (cart) {
+        const data = await prepareCart(cart);
+        res.status(StatusCodes.OK).send({ data });
+      } else {
+
+        res.status(StatusCodes.OK).send({ data: {} });
+      }
+    } catch (error) {
+      res.status(StatusCodes.OK).send({ data: {} });
     }
   }
 );
