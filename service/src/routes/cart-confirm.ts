@@ -19,6 +19,8 @@ router.post(
   [body("supplierId").notEmpty().isString().withMessage("Supplier ID is required")],
   [body("merchantId").notEmpty().isString().withMessage("Merchant ID is required")],
   [body("deliveryDate").notEmpty().isString().withMessage("Delivery date is required")],
+  currentUser,
+  requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
     const session = await mongoose.startSession();

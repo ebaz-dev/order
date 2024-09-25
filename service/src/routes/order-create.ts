@@ -17,6 +17,8 @@ const router = express.Router();
 router.post(
   "/order/create",
   [body("id").notEmpty().isString().withMessage("Cart ID is required")],
+  currentUser,
+  requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
     const session = await mongoose.startSession();

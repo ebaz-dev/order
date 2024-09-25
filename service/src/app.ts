@@ -13,6 +13,8 @@ import { orderCreateRouter } from "./routes/order-create";
 import { orderGetRouter } from "./routes/order-get";
 import { orderListRouter } from "./routes/order-list";
 import { cartGetSupplierRouter } from "./routes/cart-get-by-supplier";
+import { orderCancelRouter } from "./routes/order-cancel";
+import { orderDeliverRouter } from "./routes/order-deliver";
 dotenv.config();
 
 const apiPrefix = "/api/v1/order";
@@ -35,6 +37,8 @@ app.use(apiPrefix, cartListRouter);
 app.use(apiPrefix, cartProductAddRouter);
 app.use(apiPrefix, cartProductRemoveRouter);
 app.use(apiPrefix, orderCreateRouter);
+app.use(apiPrefix, orderCancelRouter);
+app.use(apiPrefix, orderDeliverRouter);
 app.use(apiPrefix, orderGetRouter);
 app.use(apiPrefix, orderListRouter);
 
