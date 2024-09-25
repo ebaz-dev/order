@@ -12,6 +12,7 @@ import { natsWrapper } from "../nats-wrapper";
 import { Cart, CartStatus } from "../shared";
 import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
 import _ from "lodash";
+import { prepareCart } from "./cart-get";
 
 const router = express.Router();
 
@@ -112,7 +113,8 @@ router.post(
         updatedAt: new Date(),
       });
       await session.commitTransaction();
-      res.status(StatusCodes.OK).send(cart);
+      cart = await prepareCart(cart);
+      res.status(StatusCodes.OK).send({ data: cart });
     } catch (error: any) {
       await session.abortTransaction();
       console.error("Product add operation failed", error);

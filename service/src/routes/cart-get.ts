@@ -43,7 +43,9 @@ const prepareCart = async (
       images: productPrice.images,
       description: productPrice.description,
       quantity: product.quantity,
+      basePrice: price,
       price,
+      giftQuantity: 0,
       totalPrice: product.quantity * price,
     };
   });
