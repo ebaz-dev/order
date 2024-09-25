@@ -9,7 +9,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Cart } from "../shared";
+import { Cart, CartStatus } from "../shared";
 import { CartProductRemovedPublisher } from "../events/publisher/cart-product-removed-publisher";
 
 const router = express.Router();
@@ -17,19 +17,24 @@ const router = express.Router();
 router.post(
   "/cart/product/remove",
   [
-    body("id").notEmpty().isString().withMessage("Cart ID is required"),
+    body("supplierId").notEmpty().isString().withMessage("Supplier ID is required"),
+    body("merchantId").notEmpty().isString().withMessage("Merchant ID is required"),
     body("productId")
       .notEmpty()
       .isString()
       .withMessage("Product ID is required"),
-  ],
+  ], currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
       await Cart.updateOne(
-        { _id: req.body.id, "products.id": req.body.productId },
+        {
+          supplierId: req.body.supplierId,
+          merchantId: req.body.merchantId,
+          status: CartStatus.Created, "products.id": req.body.productId
+        },
         {
           $pull: {
             products: {
@@ -39,7 +44,8 @@ router.post(
         }
       );
       await new CartProductRemovedPublisher(natsWrapper.client).publish({
-        id: req.body.id,
+        supplierId: req.body.supplierId,
+        merchantId: req.body.merchantId,
         productId: req.body.productId,
         updatedAt: new Date(),
       });
