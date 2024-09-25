@@ -58,13 +58,12 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);
+        msg.ack();
       } else {
         cart.set({ status: CartStatus.Created })
         await cart.save();
+        msg.ack();
       }
-
-
-      msg.ack();
     } catch (error) {
       console.error("Error processing InventoryCreatedEvent:", error);
     }
