@@ -13,7 +13,7 @@ router.get(
   validateRequest,
   async (req: Request, res: Response) => {
     const order = await Order.findById(req.query.id);
-    res.status(StatusCodes.OK).send(order);
+    res.status(StatusCodes.OK).send({ data: order });
   }
 );
 

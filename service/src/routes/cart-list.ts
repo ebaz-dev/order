@@ -35,7 +35,7 @@ router.get(
     });
     const data = await Promise.all(promises);
 
-    res.status(StatusCodes.OK).send(data);
+    res.status(StatusCodes.OK).send({ data, total: data.length });
   }
 );
 

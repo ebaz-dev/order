@@ -40,6 +40,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
             id: product.id,
             name: productPrice.name,
             images: productPrice.images,
+            description: productPrice.description,
             quantity: product.quantity,
             price,
           };
@@ -58,12 +59,11 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);
-        msg.ack();
-      } else {
+      } else if (status === "cancelled") {
         cart.set({ status: CartStatus.Created })
         await cart.save();
-        msg.ack();
       }
+      msg.ack();
     } catch (error) {
       console.error("Error processing InventoryCreatedEvent:", error);
     }

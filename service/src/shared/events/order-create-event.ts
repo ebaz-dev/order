@@ -1,7 +1,7 @@
 import { OrderDoc } from "../models/order";
-import { CartEventSubjects } from "./cart-event-subjects";
+import { OrderEventSubjects } from "./order-event-subjects";
 
 export interface OrderCreatedEvent {
-  subject: CartEventSubjects.OrderCreated;
+  subject: OrderEventSubjects.OrderCreated;
   data: OrderDoc;
 }

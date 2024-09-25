@@ -19,7 +19,7 @@ router.get(
     const cart = await Cart.findOne({ _id: req.query.id });
     if (cart) {
       const data = await prepareCart(cart);
-      res.status(StatusCodes.OK).send(data);
+      res.status(StatusCodes.OK).send({ data });
     }
   }
 );
@@ -41,6 +41,7 @@ const prepareCart = async (
       id: product.id,
       name: productPrice.name,
       images: productPrice.images,
+      description: productPrice.description,
       quantity: product.quantity,
       price,
       totalPrice: product.quantity * price,

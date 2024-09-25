@@ -1,7 +1,7 @@
 import { Publisher } from "@ebazdev/core";
-import { CartEventSubjects } from "../../shared/events/cart-event-subjects";
 import { OrderCreatedEvent } from "../../shared/events/order-create-event";
+import { OrderEventSubjects } from "../../shared/events/order-event-subjects";
 
 export class OrderCreatedPublisher extends Publisher<OrderCreatedEvent> {
-  subject: CartEventSubjects.OrderCreated = CartEventSubjects.OrderCreated;
+  subject: OrderEventSubjects.OrderCreated = OrderEventSubjects.OrderCreated;
 }

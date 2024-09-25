@@ -47,7 +47,6 @@ router.post(
           userId: req.currentUser?.id,
           status: CartStatus.Created,
         });
-        console.log("cart", cart);
         const product = _.first(
           _.filter(cart?.products, (p) => {
             return p.id.toString() === data.productId;
@@ -58,7 +57,6 @@ router.post(
         const quantity = (product?.quantity || 0) + data.quantity;
         exists.remove = quantity <= 0 ? true : false;
       } catch (error) { }
-      console.log("exists", exists);
       if (!!exists.cart) {
         await Cart.updateOne(
           {
@@ -96,6 +94,7 @@ router.post(
             }
             : {}
         );
+        cart = await Cart.findById(cart.id)
       } else {
         cart = await Cart.create({
           status: CartStatus.Created,
@@ -113,7 +112,7 @@ router.post(
         updatedAt: new Date(),
       });
       await session.commitTransaction();
-      res.status(StatusCodes.OK).send(cart.id);
+      res.status(StatusCodes.OK).send(cart);
     } catch (error: any) {
       await session.abortTransaction();
       console.error("Product add operation failed", error);

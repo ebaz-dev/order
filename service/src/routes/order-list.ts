@@ -25,7 +25,7 @@ router.get(
     }
     const orders = await Order.find(criteria);
 
-    res.status(StatusCodes.OK).send(orders);
+    res.status(StatusCodes.OK).send({ data: orders, total: orders.length });
   }
 );
 
