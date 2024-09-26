@@ -26,7 +26,7 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const cart = await Cart.findOne({
+      let cart = await Cart.findOne({
         supplierId: req.body.supplierId,
         merchantId: req.body.merchantId,
         status: CartStatus.Created,
@@ -38,6 +38,7 @@ router.post(
           status: CartStatus.Pending,
         }
       );
+      cart = await Cart.findOne({ _id: cart?.id })
       if (cart) {
         await new CartConfirmedPublisher(natsWrapper.client).publish(cart);
       }

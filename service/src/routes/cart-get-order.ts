@@ -8,13 +8,13 @@ import { Order } from "../shared";
 const router = express.Router();
 
 router.get(
-  "/order/get",
-  [query("id").notEmpty().isString().withMessage("ID is required")], currentUser, requireAuth,
+  "/cart/get/order",
+  [query("cartId").notEmpty().isString().withMessage("Cart ID is required")],
   validateRequest,
   async (req: Request, res: Response) => {
-    const order = await Order.findById(req.query.id);
+    const order = await Order.findOne({ cartId: req.query.cartId });
     res.status(StatusCodes.OK).send({ data: order });
   }
 );
 
-export { router as orderGetRouter };
+export { router as cartGetOrderRouter };

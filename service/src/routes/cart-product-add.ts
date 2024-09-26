@@ -7,7 +7,7 @@ import {
 } from "@ebazdev/core";
 import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
 import { Cart, CartStatus } from "../shared";
 import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
@@ -46,8 +46,11 @@ router.post(
           supplierId: data.supplierId,
           merchantId: data.merchantId,
           userId: req.currentUser?.id,
-          status: CartStatus.Created,
+          status: { $in: [CartStatus.Created, CartStatus.Pending] }
         });
+        if (cart.status === CartStatus.Pending) {
+          throw new Error("Processing cart to order!");
+        }
         const product = _.first(
           _.filter(cart?.products, (p) => {
             return p.id.toString() === data.productId;

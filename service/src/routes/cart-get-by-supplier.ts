@@ -17,7 +17,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
 
-      const cart = await Cart.findOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: CartStatus.Created });
+      const cart = await Cart.findOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: { $in: [CartStatus.Created, CartStatus.Pending] } });
       if (cart) {
         const data = await prepareCart(cart);
         res.status(StatusCodes.OK).send({ data });
