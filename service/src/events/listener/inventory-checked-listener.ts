@@ -42,6 +42,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
             description: productPrice.description,
             quantity: product.quantity,
             price,
+            inCase: productPrice.inCase
           };
         });
         const products = await Promise.all(promises);
@@ -53,7 +54,6 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           cartId: cart.id,
           orderedAt: new Date(),
           deliveryDate: cart.deliveryDate,
-          paymentMethod: cart.paymentMethod,
           products: products
         })
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });

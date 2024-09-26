@@ -10,14 +10,15 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Order, OrderStatus } from "../shared";
-import { OrderDeliveredPublisher } from "../events/publisher/order-delivered-publisher";
+import { Order } from "../shared";
+import { OrderPaymentMethodUpdatedPublisher } from "../events/publisher/order-delivered-publisher copy";
 
 const router = express.Router();
 
 router.post(
-  "/deliver",
+  "/update/payment-method",
   [body("id").notEmpty().isString().withMessage("Order ID is required")],
+  [body("paymentMethod").notEmpty().isString().withMessage("Payment method is required")],
   currentUser,
   requireAuth,
   validateRequest,
@@ -27,24 +28,24 @@ router.post(
     try {
       const order = await Order.findOne({
         _id: req.body.id,
-        status: OrderStatus.Confirmed,
       });
       if (!order) {
         throw new NotFoundError();
       }
-      order.status = OrderStatus.Delivered;
-      await new OrderDeliveredPublisher(natsWrapper.client).publish(order);
+      order.paymentMethod = req.body.paymentMethod;
+      await order.save();
+      await new OrderPaymentMethodUpdatedPublisher(natsWrapper.client).publish(order);
       await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: order });
     } catch (error: any) {
       await session.abortTransaction();
 
-      console.error("order deliver operation failed", error);
-      throw new BadRequestError("order deliver operation failed");
+      console.error("order payment method update operation failed", error);
+      throw new BadRequestError("order payment method update operation failed");
     } finally {
       session.endSession();
     }
   }
 );
 
-export { router as orderDeliverRouter };
+export { router as orderUpdatePaymentMethodRouter };

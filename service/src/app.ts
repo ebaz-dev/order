@@ -15,6 +15,7 @@ import { cartGetSupplierRouter } from "./routes/cart-get-by-supplier";
 import { orderCancelRouter } from "./routes/order-cancel";
 import { orderDeliverRouter } from "./routes/order-deliver";
 import { cartGetOrderRouter } from "./routes/cart-get-order";
+import { orderUpdatePaymentMethodRouter } from "./routes/order-update-payment-method";
 dotenv.config();
 
 const apiPrefix = "/api/v1/order";
@@ -41,6 +42,7 @@ app.use(apiPrefix, orderCancelRouter);
 app.use(apiPrefix, orderDeliverRouter);
 app.use(apiPrefix, orderGetRouter);
 app.use(apiPrefix, orderListRouter);
+app.use(apiPrefix, orderUpdatePaymentMethodRouter);
 
 app.all("*", async () => {
   throw new NotFoundError();

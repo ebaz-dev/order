@@ -21,7 +21,6 @@ router.post(
   [body("supplierId").notEmpty().isString().withMessage("Supplier ID is required")],
   [body("merchantId").notEmpty().isString().withMessage("Merchant ID is required")],
   [body("deliveryDate").notEmpty().isString().withMessage("Delivery date is required")],
-  [body("paymentMethod").notEmpty().isString().withMessage("Payment method date is required")],
   currentUser,
   requireAuth,
   validateRequest,
@@ -40,7 +39,6 @@ router.post(
       }
 
       cart.deliveryDate = req.body.deliveryDate
-      cart.paymentMethod = req.body.paymentMethod
       cart.status = CartStatus.Pending
 
       await cart.save();

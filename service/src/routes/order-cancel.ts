@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import {
   BadRequestError,
   currentUser,
+  NotFoundError,
   requireAuth,
   validateRequest,
 } from "@ebazdev/core";
@@ -28,15 +29,11 @@ router.post(
         _id: req.body.id,
         status: OrderStatus.Confirmed,
       });
-      await Order.updateOne(
-        { _id: req.body.id },
-        {
-          status: OrderStatus.Cancelled
-        }
-      );
-      if (order) {
-        await new OrderCancelledPublisher(natsWrapper.client).publish(order);
+      if (!order) {
+        throw new NotFoundError();
       }
+      order.status = OrderStatus.Cancelled;
+      await new OrderCancelledPublisher(natsWrapper.client).publish(order);
       await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: order });
     } catch (error: any) {

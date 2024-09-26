@@ -49,6 +49,7 @@ const prepareCart = async (
       giftQuantity: 0,
       totalPrice: product.quantity * price,
       stock: productPrice.inventory?.availableStock,
+      inCase: productPrice.inCase
     };
   });
   const products = await Promise.all(promises);

@@ -12,9 +12,10 @@ export enum OrderStatus {
 interface OrderProductDoc extends Document {
   id: Types.ObjectId;
   name: string;
-  images: string[];
+  images?: string[];
   price: number;
   quantity: number;
+  inCase?: number;
 }
 const orderProductSchema = new Schema<OrderProductDoc>(
   {
@@ -38,6 +39,10 @@ const orderProductSchema = new Schema<OrderProductDoc>(
     quantity: {
       type: Number,
       required: true,
+    },
+    inCase: {
+      type: Number,
+      required: false,
     },
   },
   { _id: false }
