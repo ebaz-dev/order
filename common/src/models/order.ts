@@ -52,6 +52,7 @@ interface OrderDoc extends Document {
   products: OrderProductDoc[];
   orderedAt: Date;
   deliveryDate: Date;
+  paymentMethod: string;
 }
 
 const orderSchema = new Schema<OrderDoc>(
@@ -79,7 +80,11 @@ const orderSchema = new Schema<OrderDoc>(
     },
     products: [orderProductSchema],
     orderedAt: Date,
-    deliveryDate: Date
+    deliveryDate: Date,
+    paymentMethod: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
