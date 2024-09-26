@@ -16,7 +16,6 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
 
   async onMessage(data: CartInventoryCheckedEvent["data"], msg: Message) {
     try {
-      console.log("cart inventory check event", data);
       const { cartId, status } = data;
 
       const cart = await Cart.findById(cartId);
@@ -54,6 +53,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           cartId: cart.id,
           orderedAt: new Date(),
           deliveryDate: cart.deliveryDate,
+          paymentMethod: cart.paymentMethod,
           products: products
         })
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });

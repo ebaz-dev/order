@@ -38,7 +38,7 @@ router.post(
         await new OrderDeliveredPublisher(natsWrapper.client).publish(order);
       }
       await session.commitTransaction();
-      res.status(StatusCodes.OK).send(order);
+      res.status(StatusCodes.OK).send({ data: order });
     } catch (error: any) {
       await session.abortTransaction();
 

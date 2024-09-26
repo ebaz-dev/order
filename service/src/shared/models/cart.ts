@@ -10,9 +10,9 @@ export enum CartStatus {
 interface CartProductDoc extends Document {
   id: Types.ObjectId;
   quantity: number;
-  name: string;
-  price: number;
-  totalPrice: number;
+  name?: string;
+  price?: number;
+  totalPrice?: number;
 }
 const cartProductSchema = new Schema<CartProductDoc>(
   {
@@ -37,6 +37,7 @@ interface CartDoc extends Document {
   products: CartProductDoc[];
   orderedAt: Date;
   deliveryDate: Date;
+  paymentMethod: string;
 }
 
 const cartSchema = new Schema<CartDoc>(
@@ -60,6 +61,10 @@ const cartSchema = new Schema<CartDoc>(
     products: [cartProductSchema],
     orderedAt: Date,
     deliveryDate: Date,
+    paymentMethod: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

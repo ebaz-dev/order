@@ -9,7 +9,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Cart, CartStatus } from "../shared";
+import { Cart, CartProductDoc, CartStatus } from "../shared";
 import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
 import _ from "lodash";
 import { prepareCart } from "./cart-get";
@@ -38,74 +38,46 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     const data = req.body;
-    const exists = { cart: false, product: false, remove: false };
-    let cart: any;
+
     try {
-      try {
-        cart = await Cart.findOne({
-          supplierId: data.supplierId,
-          merchantId: data.merchantId,
-          userId: req.currentUser?.id,
-          status: { $in: [CartStatus.Created, CartStatus.Pending] }
-        });
+      let cart = await Cart.findOne({
+        supplierId: data.supplierId,
+        merchantId: data.merchantId,
+        userId: req.currentUser?.id,
+        status: { $in: [CartStatus.Created, CartStatus.Pending] }
+      });
+      let quantity = data.quantity;
+      if (cart) {
         if (cart.status === CartStatus.Pending) {
           throw new Error("Processing cart to order!");
         }
-        const product = _.first(
-          _.filter(cart?.products, (p) => {
-            return p.id.toString() === data.productId;
+        let index = -1;
+        cart.products.forEach((product, i) => {
+          if (product.id.toString() === data.productId) {
+            index = i;
+            quantity += product.quantity;
+          }
+        });
+        if (index > -1) {
+          if (quantity > 0) {
+            cart.products[index].quantity = quantity;
+          } else {
+            cart.products.splice(index, 1)
+          }
+        } else if (index < 0 && quantity > 0) {
+          cart.products.push(<CartProductDoc>{
+            id: data.productId,
+            quantity: data.quantity
           })
-        );
-        exists.cart = !!cart;
-        exists.product = !!product;
-        const quantity = (product?.quantity || 0) + data.quantity;
-        exists.remove = quantity <= 0 ? true : false;
-      } catch (error) { }
-      if (!!exists.cart) {
-        await Cart.updateOne(
-          {
-            supplierId: data.supplierId,
-            merchantId: data.merchantId,
-            userId: req.currentUser?.id,
-            status: CartStatus.Created,
-          },
-          !!exists.remove
-            ? {
-              $pull: {
-                products: {
-                  id: data.productId,
-                },
-              },
-            }
-            : !!exists.product
-              ? {
-                $inc: {
-                  "products.$[p].quantity": data.quantity,
-                },
-              }
-              : {
-                $push: {
-                  products: {
-                    id: data.productId,
-                    quantity: data.quantity,
-                  },
-                },
-              },
-          !!exists.product
-            ? {
-              arrayFilters: [{ "p.id": data.productId }],
-              upsert: true,
-            }
-            : {}
-        );
-        cart = await Cart.findById(cart.id)
+        }
+        await cart.save()
       } else {
         cart = await Cart.create({
           status: CartStatus.Created,
           supplierId: data.supplierId,
           merchantId: data.merchantId,
           userId: req.currentUser?.id,
-          products: [{ id: data.productId, quantity: data.quantity }],
+          products: quantity > 0 ? [{ id: data.productId, quantity: data.quantity }] : [],
         });
       }
 
@@ -115,8 +87,8 @@ router.post(
         quantity: data.quantity,
         updatedAt: new Date(),
       });
-      await session.commitTransaction();
       cart = await prepareCart(cart);
+      await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: cart });
     } catch (error: any) {
       await session.abortTransaction();

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import {
   BadRequestError,
   currentUser,
+  NotFoundError,
   requireAuth,
   validateRequest,
 } from "@ebazdev/core";
@@ -11,6 +12,7 @@ import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
 import { Cart, CartStatus } from "../shared";
 import { CartConfirmedPublisher } from "../events/publisher/cart-confirmed-publisher";
+import { prepareCart } from "./cart-get";
 
 const router = express.Router();
 
@@ -19,6 +21,7 @@ router.post(
   [body("supplierId").notEmpty().isString().withMessage("Supplier ID is required")],
   [body("merchantId").notEmpty().isString().withMessage("Merchant ID is required")],
   [body("deliveryDate").notEmpty().isString().withMessage("Delivery date is required")],
+  [body("paymentMethod").notEmpty().isString().withMessage("Payment method date is required")],
   currentUser,
   requireAuth,
   validateRequest,
@@ -26,24 +29,28 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      let cart = await Cart.findOne({
+      const cart = await Cart.findOne({
         supplierId: req.body.supplierId,
         merchantId: req.body.merchantId,
         status: CartStatus.Created,
       });
-      await Cart.updateOne(
-        { _id: req.body.id },
-        {
-          deliveryDate: req.body.deliveryDate,
-          status: CartStatus.Pending,
-        }
-      );
-      cart = await Cart.findOne({ _id: cart?.id })
-      if (cart) {
-        await new CartConfirmedPublisher(natsWrapper.client).publish(cart);
+
+      if (!cart) {
+        throw new NotFoundError()
       }
+
+      cart.deliveryDate = req.body.deliveryDate
+      cart.paymentMethod = req.body.paymentMethod
+      cart.status = CartStatus.Pending
+
+      await cart.save();
+
+      await new CartConfirmedPublisher(natsWrapper.client).publish(cart);
       await session.commitTransaction();
-      res.status(StatusCodes.OK).send(cart);
+
+      const preparedCart = await prepareCart(cart);
+
+      res.status(StatusCodes.OK).send({ data: preparedCart });
     } catch (error: any) {
       await session.abortTransaction();
 

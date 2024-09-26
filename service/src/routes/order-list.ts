@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get(
   "/list",
-  validateRequest,
+  validateRequest, currentUser, requireAuth,
   async (req: Request, res: Response) => {
     const criteria: any = {
     };
