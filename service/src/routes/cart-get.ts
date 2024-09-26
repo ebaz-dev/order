@@ -37,6 +37,7 @@ const prepareCart = async (
     const price = productPrice._adjustedPrice
       ? productPrice._adjustedPrice.price + productPrice._adjustedPrice.cost
       : 0;
+
     return {
       id: product.id,
       name: productPrice.name,
@@ -47,6 +48,8 @@ const prepareCart = async (
       price,
       giftQuantity: 0,
       totalPrice: product.quantity * price,
+      stock: productPrice.inventory?.availableStock,
+      productPrice
     };
   });
   const products = await Promise.all(promises);

@@ -6,7 +6,7 @@ import { Order } from "../shared";
 const router = express.Router();
 
 router.get(
-  "/order/list",
+  "/list",
   validateRequest,
   async (req: Request, res: Response) => {
     const criteria: any = {

@@ -15,7 +15,7 @@ import { OrderCancelledPublisher } from "../events/publisher/order-cancelled-pub
 const router = express.Router();
 
 router.post(
-  "/order/cancel",
+  "/cancel",
   [body("id").notEmpty().isString().withMessage("Order ID is required")],
   currentUser,
   requireAuth,

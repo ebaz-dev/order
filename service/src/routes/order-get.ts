@@ -8,7 +8,7 @@ import { Order } from "../shared";
 const router = express.Router();
 
 router.get(
-  "/order/get",
+  "/get",
   [query("id").notEmpty().isString().withMessage("ID is required")], currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {

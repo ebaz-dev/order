@@ -15,7 +15,7 @@ import { OrderDeliveredPublisher } from "../events/publisher/order-delivered-pub
 const router = express.Router();
 
 router.post(
-  "/order/deliver",
+  "/deliver",
   [body("id").notEmpty().isString().withMessage("Order ID is required")],
   currentUser,
   requireAuth,
