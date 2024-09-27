@@ -41,7 +41,9 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
             images: productPrice.images,
             description: productPrice.description,
             quantity: product.quantity,
+            basePrice: price,
             price,
+            giftQuantity: 0,
             inCase: productPrice.inCase
           };
         });
