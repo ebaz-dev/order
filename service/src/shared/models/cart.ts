@@ -3,6 +3,7 @@ import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 export enum CartStatus {
   Created = "created",
   Pending = "pending",
+  Returned = "returned",
   Ordered = "ordered",
   Cancelled = "cancelled",
 }
@@ -38,6 +39,7 @@ interface CartDoc extends Document {
   products: CartProductDoc[];
   orderedAt: Date;
   deliveryDate: Date;
+  returnedProducts?: string[];
 }
 
 const cartSchema = new Schema<CartDoc>(
@@ -61,6 +63,7 @@ const cartSchema = new Schema<CartDoc>(
     products: [cartProductSchema],
     orderedAt: Date,
     deliveryDate: Date,
+    returnedProducts: [String]
   },
   {
     timestamps: true,

@@ -23,7 +23,7 @@ router.get(
       products: { $exists: true, $ne: [] },
       merchantId: req.query.merchantId,
       userId: req.currentUser?.id,
-      status: CartStatus.Created,
+      status: { $in: [CartStatus.Created, CartStatus.Returned] }
     };
     if (req.query.supplierId) {
       criteria.supplierId = req.query.supplierId;

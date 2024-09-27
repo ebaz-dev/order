@@ -33,7 +33,7 @@ router.post(
         {
           supplierId: req.body.supplierId,
           merchantId: req.body.merchantId,
-          status: CartStatus.Created, "products.id": req.body.productId
+          status: { $in: [CartStatus.Created, CartStatus.Returned] }, "products.id": req.body.productId
         },
         {
           $pull: {

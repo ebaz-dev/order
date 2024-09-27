@@ -31,7 +31,7 @@ router.post(
       const cart = await Cart.findOne({
         supplierId: req.body.supplierId,
         merchantId: req.body.merchantId,
-        status: CartStatus.Created,
+        status: { $in: [CartStatus.Created, CartStatus.Returned] }
       });
 
       if (!cart) {

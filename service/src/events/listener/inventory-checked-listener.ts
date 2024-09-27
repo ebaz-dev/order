@@ -16,7 +16,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
 
   async onMessage(data: CartInventoryCheckedEvent["data"], msg: Message) {
     try {
-      const { cartId, status } = data;
+      const { cartId, status, insufficientProducts } = data;
 
       const cart = await Cart.findById(cartId);
 
@@ -62,7 +62,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);
       } else if (status === "cancelled") {
-        cart.set({ status: CartStatus.Created })
+        cart.set({ status: CartStatus.Returned, returnedProducts: insufficientProducts })
         await cart.save();
       }
       msg.ack();

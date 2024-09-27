@@ -44,7 +44,7 @@ router.post(
         supplierId: data.supplierId,
         merchantId: data.merchantId,
         userId: req.currentUser?.id,
-        status: { $in: [CartStatus.Created, CartStatus.Pending] }
+        status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] }
       });
       let quantity = data.quantity;
       if (cart) {
