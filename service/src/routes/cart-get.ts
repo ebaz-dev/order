@@ -7,6 +7,7 @@ import { Cart, CartDoc } from "../shared";
 import { Product } from "@ebazdev/product";
 import { Customer } from "@ebazdev/customer";
 import { Inventory } from "@ebazdev/inventory";
+import { Promo } from "@ebazdev/product/build/models/promo";
 
 const router = express.Router();
 
@@ -29,6 +30,7 @@ const prepareCart = async (
 ): Promise<any> => {
   const promises = _.map(cart.products, async (product, i) => {
     await Inventory.find({ totalStock: 100 });
+    await Promo.findOne({});
     const productPrice = await Product.findOneWithAdjustedPrice({
       query: { _id: product.id },
       merchant: { merchantId: cart.merchantId, businessTypeId: cart.merchantId },
