@@ -62,7 +62,9 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);
       } else if (status === "cancelled") {
-        cart.set({ status: CartStatus.Returned, returnedProducts: insufficientProducts })
+        cart.set({
+          status: CartStatus.Returned, returnedProducts: insufficientProducts
+        })
         await cart.save();
       }
       msg.ack();
