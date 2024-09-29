@@ -65,4 +65,4 @@ const prepareTemplate = async (
   const supplier = await Customer.findById(template.supplierId);
   return { id: template.id, products, merchant: { id: merchant?.id, name: merchant?.name }, supplier: { id: supplier?.id, name: supplier?.name } }
 };
-export { router as orderTemplateGetRouter };
+export { router as templateGetRouter };
