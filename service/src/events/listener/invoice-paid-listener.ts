@@ -25,6 +25,7 @@ export class InvoicePaidListener extends Listener<InvoicePaidEvent> {
             msg.ack();
         } catch (error) {
             console.error("Error processing InvoicePaidEvent:", error);
+            msg.ack();
         }
     }
 }
