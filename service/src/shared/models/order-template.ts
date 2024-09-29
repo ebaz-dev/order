@@ -1,7 +1,7 @@
 import { Document, Schema, Types, model } from "mongoose";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 
-export declare enum CustomerType {
+export enum TemplateType {
     Supplier = "supplier",
     Merchant = "merchant"
 }
@@ -26,7 +26,7 @@ const orderTemplateProductSchema = new Schema<OrderTemplateProductDoc>(
 );
 
 interface OrderTemplateDoc extends Document {
-    type: CustomerType;
+    type: TemplateType;
     supplierId: Types.ObjectId;
     merchantId?: Types.ObjectId;
     products: OrderTemplateProductDoc[];
@@ -34,7 +34,7 @@ interface OrderTemplateDoc extends Document {
 
 const orderTemplateSchema = new Schema<OrderTemplateDoc>(
     {
-        type: { type: String, enum: Object.values(CustomerType), required: true },
+        type: { type: String, enum: Object.values(TemplateType), required: true },
         supplierId: {
             type: Schema.Types.ObjectId,
             required: true,
