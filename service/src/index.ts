@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { app } from "./app";
 import { natsWrapper } from "./nats-wrapper";
 import { CartInventoryCheckedListener } from "./events/listener/inventory-checked-listener";
+import { InvoicePaidListener } from "./events/listener/invoice-paid-listener";
 
 const start = async () => {
   if (!process.env.PORT) {
@@ -42,6 +43,7 @@ const start = async () => {
     process.on("SIGTERM", () => natsWrapper.client.close());
 
     new CartInventoryCheckedListener(natsWrapper.client).listen();
+    new InvoicePaidListener(natsWrapper.client).listen();
 
 
     await mongoose.connect(process.env.MONGO_URI);

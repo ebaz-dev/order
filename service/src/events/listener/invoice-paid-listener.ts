@@ -20,8 +20,7 @@ export class InvoicePaidListener extends Listener<InvoicePaidEvent> {
                 throw new Error("Order not found");
             }
             order.set({ status: OrderStatus.Confirmed })
-            await order
-            .save();
+            await order.save();
             await new OrderConfirmedPublisher(natsWrapper.client).publish(order);
             msg.ack();
         } catch (error) {
