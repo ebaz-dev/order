@@ -18,7 +18,7 @@ import { cartRepo } from "../repository/cart.repo";
 const router = express.Router();
 
 router.post(
-  "/cart/product/add",
+  "/cart/products/add",
   [
     body("supplierId")
       .notEmpty()
@@ -28,11 +28,10 @@ router.post(
       .notEmpty()
       .isString()
       .withMessage("Merchant ID is required"),
-    body("productId")
+    body("products")
       .notEmpty()
-      .isString()
-      .withMessage("Product ID is required"),
-    body("quantity").notEmpty().isNumeric().withMessage("Quantity is required"),
+      .isArray()
+      .withMessage("Products are required"),
   ], currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
@@ -47,30 +46,11 @@ router.post(
         userId: req.currentUser?.id,
         status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] }
       });
-      let quantity = data.quantity;
       if (cart) {
         if (cart.status === CartStatus.Pending) {
           throw new Error("Processing cart to order!");
         }
-        let index = -1;
-        cart.products.forEach((product, i) => {
-          if (product.id.toString() === data.productId) {
-            index = i;
-            quantity += product.quantity;
-          }
-        });
-        if (index > -1) {
-          if (quantity > 0) {
-            cart.products[index].quantity = quantity;
-          } else {
-            cart.products.splice(index, 1)
-          }
-        } else if (index < 0 && quantity > 0) {
-          cart.products.push(<CartProductDoc>{
-            id: data.productId,
-            quantity: data.quantity
-          })
-        }
+        cart.products = data.products;
         await cart.save()
       } else {
         cart = await cartRepo.create(<CartDoc>{
@@ -78,14 +58,13 @@ router.post(
           supplierId: data.supplierId,
           merchantId: data.merchantId,
           userId: new Types.ObjectId(req.currentUser?.id),
-          products: quantity > 0 ? [<CartProductDoc>{ id: data.productId, quantity: data.quantity }] : [],
+          products: data.products,
         });
       }
 
       await new CartProductAddedPublisher(natsWrapper.client).publish({
         id: cart.id,
-        productId: data.productId,
-        quantity: data.quantity,
+        products: data.products,
         updatedAt: new Date(),
       });
       cart = await prepareCart(cart);

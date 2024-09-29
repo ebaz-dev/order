@@ -13,3 +13,5 @@ export * from "./events/order-deliver-event";
 export * from "./events/order-cancel-event";
 
 export * from "./models/order";
+
+export * from "./models/order-template";

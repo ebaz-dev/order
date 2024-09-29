@@ -12,8 +12,11 @@ export enum OrderStatus {
 interface OrderProductDoc extends Document {
   id: Types.ObjectId;
   name: string;
+  description?: string;
   images?: string[];
   price: number;
+  basePrice?: number;
+  giftQuantity?: number;
   quantity: number;
   inCase?: number;
 }
@@ -107,4 +110,4 @@ orderSchema.plugin(updateIfCurrentPlugin);
 
 const Order = model<OrderDoc>("Order", orderSchema);
 
-export { OrderDoc, Order };
+export { OrderDoc, Order, OrderProductDoc };

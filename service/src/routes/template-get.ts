@@ -3,24 +3,27 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { CartDoc } from "../shared";
+import { CartDoc, OrderTemplateDoc } from "../shared";
 import { Product } from "@ebazdev/product";
 import { Customer } from "@ebazdev/customer";
 import { Inventory } from "@ebazdev/inventory";
 import { Promo } from "@ebazdev/product/build/models/promo";
 import { cartRepo } from "../repository/cart.repo";
+import { orderTemplateRepo } from "../repository/order-template.repo";
+import { Types } from "mongoose";
 
 const router = express.Router();
 
 router.get(
-  "/cart/get",
+  "/template/get",
   [query("id").notEmpty().isString().withMessage("ID is required")],
+  [query("merchantId").notEmpty().isString().withMessage("Merchant ID is required")],
   currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const cart = await cartRepo.selectOne({ _id: req.query.id });
-    if (cart) {
-      const data = await prepareCart(cart);
+    const orderTemplate = await orderTemplateRepo.selectOne({ _id: req.query.id });
+    if (orderTemplate) {
+      const data = await prepareTemplate(orderTemplate, req.body.merchantId);
       res.status(StatusCodes.OK).send({ data });
     } else {
       throw new Error("Select: not found");
@@ -28,15 +31,15 @@ router.get(
   }
 );
 
-const prepareCart = async (
-  cart: CartDoc
+const prepareTemplate = async (
+  template: OrderTemplateDoc, merchantId: Types.ObjectId
 ): Promise<any> => {
-  const promises = _.map(cart.products, async (product, i) => {
+  const promises = _.map(template.products, async (product, i) => {
     await Inventory.find({ totalStock: 100 });
     await Promo.findOne({});
     const productPrice = await Product.findOneWithAdjustedPrice({
       query: { _id: product.id },
-      merchant: { merchantId: cart.merchantId, businessTypeId: cart.merchantId },
+      merchant: { merchantId: merchantId, businessTypeId: merchantId },
     });
 
     const price = productPrice._adjustedPrice
@@ -58,8 +61,8 @@ const prepareCart = async (
     };
   });
   const products = await Promise.all(promises);
-  const merchant = await Customer.findById(cart.merchantId);
-  const supplier = await Customer.findById(cart.supplierId);
-  return { id: cart.id, status: cart.status, userId: cart.userId, products, merchant: { id: merchant?.id, name: merchant?.name }, supplier: { id: supplier?.id, name: supplier?.name } }
+  const merchant = await Customer.findById(merchantId);
+  const supplier = await Customer.findById(template.supplierId);
+  return { id: template.id, products, merchant: { id: merchant?.id, name: merchant?.name }, supplier: { id: supplier?.id, name: supplier?.name } }
 };
-export { router as cartGetRouter, prepareCart };
+export { router as orderTemplateGetRouter };

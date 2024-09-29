@@ -13,6 +13,7 @@ import { natsWrapper } from "../nats-wrapper";
 import { Cart, CartStatus } from "../shared";
 import { CartConfirmedPublisher } from "../events/publisher/cart-confirmed-publisher";
 import { prepareCart } from "./cart-get";
+import { cartRepo } from "../repository/cart.repo";
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const cart = await Cart.findOne({
+      const cart = await cartRepo.selectOne({
         supplierId: req.body.supplierId,
         merchantId: req.body.merchantId,
         status: { $in: [CartStatus.Created, CartStatus.Returned] }

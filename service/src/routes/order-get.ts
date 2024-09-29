@@ -3,7 +3,7 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { Order } from "../shared";
+import { orderRepo } from "../repository/order.repo";
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router.get(
   [query("id").notEmpty().isString().withMessage("ID is required")], currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const order = await Order.findById(req.query.id);
+    const order = await orderRepo.findById(req.query.id as string);
     res.status(StatusCodes.OK).send({ data: order });
   }
 );

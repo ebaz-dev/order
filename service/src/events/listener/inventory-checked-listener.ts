@@ -4,11 +4,13 @@ import {
   OrderInventoryEventSubjects, CartInventoryCheckedEvent
 } from "@ebazdev/inventory";
 import { queueGroupName } from "./queue-group-name";
-import { Cart, CartStatus, Order, OrderStatus } from "../../shared";
+import { CartStatus, OrderDoc, OrderProductDoc, OrderStatus } from "../../shared";
 import { natsWrapper } from "../../nats-wrapper";
 import { OrderCreatedPublisher } from "../publisher/order-created-publisher";
 import { Product } from "@ebazdev/product";
 import _ from "lodash";
+import { cartRepo } from "../../repository/cart.repo";
+import { orderRepo } from "../../repository/order.repo";
 
 export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedEvent> {
   readonly subject = OrderInventoryEventSubjects.CartInventoryChecked;
@@ -18,7 +20,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
     try {
       const { cartId, status, insufficientProducts } = data;
 
-      const cart = await Cart.findById(cartId);
+      const cart = await cartRepo.findById(cartId);
 
       if (!cart) {
         throw new Error("Cart not found");
@@ -35,7 +37,8 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           const price = productPrice._adjustedPrice
             ? productPrice._adjustedPrice.price + productPrice._adjustedPrice.cost
             : 0;
-          return {
+
+          return <OrderProductDoc>{
             id: product.id,
             name: productPrice.name,
             images: productPrice.images,
@@ -48,7 +51,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           };
         });
         const products = await Promise.all(promises);
-        const order = await Order.create({
+        const order = await orderRepo.create(<OrderDoc>{
           status: OrderStatus.Created,
           supplierId: cart.supplierId,
           merchantId: cart.merchantId,

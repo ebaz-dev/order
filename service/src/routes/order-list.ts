@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
-import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
+import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
 import { Order } from "../shared";
+import { orderRepo } from "../repository/order.repo";
 
 const router = express.Router();
 
@@ -23,9 +24,12 @@ router.get(
     if (req.query.status) {
       criteria.status = req.query.status;
     }
-    const orders = await Order.find(criteria);
+    const options: QueryOptions = <QueryOptions>req.query;
+    options.sortBy = "updatedAt";
+    options.sortDir = -1;
+    const result = await orderRepo.selectAndCountAll(criteria, options);
 
-    res.status(StatusCodes.OK).send({ data: orders, total: orders.length });
+    res.status(StatusCodes.OK).send(result);
   }
 );
 

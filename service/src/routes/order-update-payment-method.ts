@@ -12,6 +12,7 @@ import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
 import { Order } from "../shared";
 import { OrderPaymentMethodUpdatedPublisher } from "../events/publisher/order-delivered-publisher copy";
+import { orderRepo } from "../repository/order.repo";
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const order = await Order.findOne({
+      const order = await orderRepo.selectOne({
         _id: req.body.id,
       });
       if (!order) {

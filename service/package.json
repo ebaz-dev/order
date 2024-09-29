@@ -24,7 +24,7 @@
   "description": "",
   "dependencies": {
     "@ebazdev/auth": "^1.0.20",
-    "@ebazdev/core": "^1.0.18",
+    "@ebazdev/core": "^1.0.23",
     "@ebazdev/customer": "^1.0.12",
     "@ebazdev/inventory": "^1.0.21",
     "@ebazdev/payment": "^1.0.13",

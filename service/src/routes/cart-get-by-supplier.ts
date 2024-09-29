@@ -3,8 +3,9 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { Cart, CartStatus } from "../shared";
+import { CartStatus } from "../shared";
 import { prepareCart } from "./cart-get";
+import { cartRepo } from "../repository/cart.repo";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get(
   validateRequest,
   async (req: Request, res: Response) => {
     try {
-      const cart = await Cart.findOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] } });
+      const cart = await cartRepo.selectOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] } });
       if (cart) {
         const data = await prepareCart(cart);
         res.status(StatusCodes.OK).send({ data });

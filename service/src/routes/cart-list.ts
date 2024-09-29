@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
-import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
+import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
 import { Cart, CartStatus } from "../shared";
 import { query } from "express-validator";
 import _ from "lodash";
 import { prepareCart } from "./cart-get";
+import { cartRepo } from "../repository/cart.repo";
 
 const router = express.Router();
 
@@ -28,14 +29,17 @@ router.get(
     if (req.query.supplierId) {
       criteria.supplierId = req.query.supplierId;
     }
-    const carts = await Cart.find(criteria);
+    const options: QueryOptions = <QueryOptions>req.query;
+    options.sortBy = "updatedAt";
+    options.sortDir = -1;
+    const result = await cartRepo.selectAndCountAll(criteria, options);
 
-    const promises = _.map(carts, async (cart) => {
+    const promises = _.map(result.data, async (cart) => {
       return prepareCart(cart);
     });
     const data = await Promise.all(promises);
 
-    res.status(StatusCodes.OK).send({ data, total: data.length });
+    res.status(StatusCodes.OK).send({ data, total: result.total, totalPages: result.totalPages, currentPage: result.currentPage });
   }
 );
 
