@@ -26,4 +26,4 @@ router.get(
   }
 );
 
-export { router as templateLitRouter };
+export { router as templateListRouter };

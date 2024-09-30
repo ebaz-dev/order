@@ -19,6 +19,7 @@ import { orderUpdatePaymentMethodRouter } from "./routes/order-update-payment-me
 import { templateCreateRouter } from "./routes/template-create";
 import { templateUpdateRouter } from "./routes/template-update";
 import { templateGetRouter } from "./routes/template-get";
+import { templateListRouter } from "./routes/template-list";
 dotenv.config();
 
 const apiPrefix = "/api/v1/order";
@@ -49,6 +50,7 @@ app.use(apiPrefix, orderUpdatePaymentMethodRouter);
 app.use(apiPrefix, templateCreateRouter);
 app.use(apiPrefix, templateUpdateRouter);
 app.use(apiPrefix, templateGetRouter);
+app.use(apiPrefix, templateListRouter);
 
 app.all("*", async () => {
   throw new NotFoundError();
