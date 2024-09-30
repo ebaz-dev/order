@@ -125,7 +125,8 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
         totalPrice: item.quantity * price,
         stock: foundProduct.inventory?.availableStock,
         inCase: foundProduct.inCase,
-        promoId: item.promoId
+        promoId: item.promoId,
+        thirdPartyData: foundProduct.thirdPartyData
       };
     }
   });

@@ -85,6 +85,7 @@ interface OrderDoc extends Document {
   userId: Types.ObjectId;
   cartId: Types.ObjectId;
   products: OrderProductDoc[];
+  giftProducts: OrderProductDoc[];
   orderedAt: Date;
   deliveryDate: Date;
   paymentMethod: PaymentMethods;
@@ -115,6 +116,7 @@ const orderSchema = new Schema<OrderDoc>(
       ref: "Cart",
     },
     products: [orderProductSchema],
+    giftProducts: [orderProductSchema],
     orderedAt: Date,
     deliveryDate: Date,
     paymentMethod: {
