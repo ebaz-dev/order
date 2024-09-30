@@ -10,19 +10,30 @@ router.get(
   "/list",
   validateRequest, currentUser, requireAuth,
   async (req: Request, res: Response) => {
+    const query: any = req.query;
     const criteria: any = {
     };
-    if (req.query.supplierId) {
-      criteria.supplierId = req.query.supplierId;
+    if (query.supplierId) {
+      criteria.supplierId = query.supplierId;
     }
-    if (req.query.merchantId) {
-      criteria.merchantId = req.query.merchantId;
+    if (query.merchantId) {
+      criteria.merchantId = query.merchantId;
     }
-    if (req.query.userId) {
-      criteria.userId = req.query.userId;
+    if (query.userId) {
+      criteria.userId = query.userId;
     }
-    if (req.query.status) {
-      criteria.status = req.query.status;
+    if (query.status) {
+      criteria.status = query.status;
+    }
+    if (query.startDate) {
+      criteria["createdAt"] = { $gte: new Date(query.startDate) };
+    }
+    if (query.endDate) {
+      if (query.startDate) {
+        criteria["createdAt"] = { $gte: new Date(query.startDate), $lte: new Date(query.endDate) };
+      } else {
+        criteria["createdAt"] = { $lte: new Date(query.endDate) };
+      }
     }
     const options: QueryOptions = <QueryOptions>req.query;
     options.sortBy = "updatedAt";

@@ -16,8 +16,8 @@ interface OrderProductDoc extends Document {
   images?: string[];
   price: number;
   basePrice?: number;
-  giftQuantity?: number;
   quantity: number;
+  giftQuantity?: number;
   inCase?: number;
 }
 const orderProductSchema = new Schema<OrderProductDoc>(
@@ -39,9 +39,17 @@ const orderProductSchema = new Schema<OrderProductDoc>(
       type: Number,
       required: true,
     },
+    basePrice: {
+      type: Number,
+      required: false,
+    },
     quantity: {
       type: Number,
       required: true,
+    },
+    giftQuantity: {
+      type: Number,
+      required: false,
     },
     inCase: {
       type: Number,
@@ -52,6 +60,7 @@ const orderProductSchema = new Schema<OrderProductDoc>(
 );
 
 interface OrderDoc extends Document {
+  orderNo: string;
   status: OrderStatus;
   supplierId: Types.ObjectId;
   merchantId: Types.ObjectId;
@@ -65,6 +74,7 @@ interface OrderDoc extends Document {
 
 const orderSchema = new Schema<OrderDoc>(
   {
+    orderNo: { type: String, required: true },
     status: { type: String, enum: Object.values(OrderStatus), required: true },
     supplierId: {
       type: Schema.Types.ObjectId,
