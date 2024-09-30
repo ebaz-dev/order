@@ -29,6 +29,10 @@ const start = async () => {
     throw new Error("NATS_CLUSTER_ID must be defined");
   }
 
+  if (!process.env.NATS_USER) {
+    throw new Error("NATS_USER must be defined");
+  }
+
   if (!process.env.NATS_PASS) {
     throw new Error("NATS_PASS must be defined");
   }
