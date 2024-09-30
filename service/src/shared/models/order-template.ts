@@ -30,6 +30,9 @@ interface OrderTemplateDoc extends Document {
     supplierId: Types.ObjectId;
     merchantId?: Types.ObjectId;
     products: OrderTemplateProductDoc[];
+    image: string;
+    name: string;
+    color: string;
 }
 
 const orderTemplateSchema = new Schema<OrderTemplateDoc>(
@@ -46,6 +49,18 @@ const orderTemplateSchema = new Schema<OrderTemplateDoc>(
             ref: "Customer",
         },
         products: [orderTemplateProductSchema],
+        name: {
+            type: String,
+            required: true,
+        },
+        image: {
+            type: String,
+            required: false,
+        },
+        color: {
+            type: String,
+            required: false,
+        },
     },
     {
         timestamps: true,

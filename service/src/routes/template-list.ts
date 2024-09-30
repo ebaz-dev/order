@@ -10,8 +10,6 @@ router.get(
   currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-
-
     const criteria: any = {
       merchantId: req.query.merchantId,
     };
@@ -22,8 +20,17 @@ router.get(
     options.sortBy = "updatedAt";
     options.sortDir = -1;
     const result = await orderTemplateRepo.selectAndCountAll(criteria, options);
-    res.status(StatusCodes.OK).send(result);
+    const promises = _.map(result.data, async (template) => {
+      return prepareTemplate(template);
+    });
+    const data = await Promise.all(promises);
+
+    res.status(StatusCodes.OK).send({ data, total: result.total, totalPages: result.totalPages, currentPage: result.currentPage });
   }
 );
 
 export { router as templateListRouter };
+function prepareTemplate(cart: any): any {
+  throw new Error("Function not implemented.");
+}
+

@@ -23,6 +23,7 @@ router.post(
             .withMessage("Type is required"),
         body("supplierId").notEmpty().isString().withMessage("Supplier ID is required"),
         body("products").notEmpty().isArray().withMessage("Products are required"),
+        body("name").notEmpty().isString().withMessage("Name is required"),
     ],
     currentUser,
     requireAuth,
