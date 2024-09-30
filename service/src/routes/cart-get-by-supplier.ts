@@ -17,7 +17,7 @@ router.get(
   validateRequest,
   async (req: Request, res: Response) => {
     try {
-      const cart = await cartRepo.selectOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] } });
+      const cart = await cartRepo.selectOne({ supplierId: req.query.supplierId, merchantId: req.query.merchantId, userId: req.currentUser?.id, status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] } });
       if (cart) {
         const data = await prepareCart(cart);
         res.status(StatusCodes.OK).send({ data });
