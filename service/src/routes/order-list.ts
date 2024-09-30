@@ -24,6 +24,9 @@ router.get(
     if (query.status) {
       criteria.status = query.status;
     }
+    if (query.orderNo) {
+      criteria.orderNo = query.orderNo;
+    }
     if (query.startDate) {
       criteria["createdAt"] = { $gte: new Date(query.startDate) };
     }
