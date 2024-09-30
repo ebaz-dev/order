@@ -10,7 +10,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Cart, CartStatus } from "../shared";
+import { CartStatus } from "../shared";
 import { CartConfirmedPublisher } from "../events/publisher/cart-confirmed-publisher";
 import { prepareCart } from "./cart-get";
 import { cartRepo } from "../repository/cart.repo";

@@ -3,7 +3,6 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { Order } from "../shared";
 import { orderRepo } from "../repository/order.repo";
 
 const router = express.Router();

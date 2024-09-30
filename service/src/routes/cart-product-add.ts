@@ -9,7 +9,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose, { Types } from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Cart, CartDoc, CartProductDoc, CartStatus } from "../shared";
+import { CartDoc, CartProductDoc, CartStatus } from "../shared";
 import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
 import _ from "lodash";
 import { prepareCart } from "./cart-get";

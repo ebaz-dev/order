@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
-import { Cart, CartStatus } from "../shared";
+import { CartStatus } from "../shared";
 import { query } from "express-validator";
 import _ from "lodash";
 import { prepareCart } from "./cart-get";

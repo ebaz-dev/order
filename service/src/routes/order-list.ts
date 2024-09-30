@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
-import { Order } from "../shared";
 import { orderRepo } from "../repository/order.repo";
 
 const router = express.Router();

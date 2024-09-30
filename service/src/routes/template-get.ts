@@ -3,12 +3,11 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { CartDoc, OrderTemplateDoc } from "../shared";
+import { OrderTemplateDoc } from "../shared";
 import { Product } from "@ebazdev/product";
 import { Customer } from "@ebazdev/customer";
 import { Inventory } from "@ebazdev/inventory";
 import { Promo } from "@ebazdev/product/build/models/promo";
-import { cartRepo } from "../repository/cart.repo";
 import { orderTemplateRepo } from "../repository/order-template.repo";
 import { Types } from "mongoose";
 

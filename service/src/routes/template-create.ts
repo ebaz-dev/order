@@ -8,7 +8,6 @@ import {
 import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import { natsWrapper } from "../nats-wrapper";
 import { orderTemplateRepo } from "../repository/order-template.repo";
 import { OrderTemplateDoc } from "../shared";
 
