@@ -18,8 +18,6 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
   const limit = 100;
   const sort: { [key: string]: 1 | -1 } = { priority: 1 };
 
-  console.log(query);
-
   const result: IReturnFindWithAdjustedPrice =
     await Product.findWithAdjustedPrice({
       query,
@@ -51,7 +49,7 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
         giftQuantity: 0,
         totalPrice: item.quantity * price,
         stock: foundProduct.inventory?.availableStock,
-        inCase: item.inCase,
+        inCase: foundProduct.inCase,
       };
     }
   });
