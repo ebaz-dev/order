@@ -1,4 +1,4 @@
-name: Deploy Order Service - Dev
+name: Deploy Inventory Service - Dev
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SERVICE_NAME: order
+      SERVICE_NAME: inventory
 
     steps:
       - name: Checkout code
