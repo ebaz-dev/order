@@ -4,8 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { CartStatus } from "../shared";
 import { query } from "express-validator";
 import _ from "lodash";
-import { prepareCart } from "./cart-get";
 import { cartRepo } from "../repository/cart.repo";
+import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ router.get(
     const result = await cartRepo.selectAndCountAll(criteria, options);
 
     const promises = _.map(result.data, async (cart) => {
-      return prepareCart(cart);
+      return migrateProducts(cart);
     });
     const data = await Promise.all(promises);
 

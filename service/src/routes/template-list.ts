@@ -3,16 +3,19 @@ import express, { Request, Response } from "express";
 import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
 import { orderTemplateRepo } from "../repository/order-template.repo";
+import { prepareTemplate } from "./template-get";
+import { Types } from "mongoose";
+import { query } from "express-validator";
 const router = express.Router();
 
 router.get(
   "/template/list",
+  [query("supplierId").notEmpty().isString().withMessage("Supplier ID is required")],
+  [query("merchantId").notEmpty().isString().withMessage("Merchant ID is required")],
   currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const criteria: any = {
-      merchantId: req.query.merchantId,
-    };
+    const criteria: any = { $or: [{ merchantId: req.query.merchantId, }, { merchantId: { $exists: false } }] }
     if (req.query.supplierId) {
       criteria.supplierId = req.query.supplierId;
     }
@@ -21,7 +24,7 @@ router.get(
     options.sortDir = -1;
     const result = await orderTemplateRepo.selectAndCountAll(criteria, options);
     const promises = _.map(result.data, async (template) => {
-      return prepareTemplate(template);
+      return prepareTemplate(template, new Types.ObjectId(req.query.merchantId as string));
     });
     const data = await Promise.all(promises);
 
@@ -30,7 +33,3 @@ router.get(
 );
 
 export { router as templateListRouter };
-function prepareTemplate(cart: any): any {
-  throw new Error("Function not implemented.");
-}
-

@@ -8,12 +8,9 @@ import {
 import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose, { Types } from "mongoose";
-import { natsWrapper } from "../nats-wrapper";
 import { Cart, CartDoc, CartProductDoc, CartStatus } from "../shared";
-import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
 import _ from "lodash";
-import { prepareCart } from "./cart-get";
-import { cartRepo } from "../repository/cart.repo";
+import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
 
@@ -100,7 +97,7 @@ router.post(
       //   updatedAt: new Date(),
       // });
 
-      cart = await prepareCart(cart);
+      cart = await migrateProducts(cart);
       await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: cart });
     } catch (error: any) {

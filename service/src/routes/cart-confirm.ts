@@ -14,6 +14,7 @@ import { CartStatus } from "../shared";
 import { CartConfirmedPublisher } from "../events/publisher/cart-confirmed-publisher";
 import { prepareCart } from "./cart-get";
 import { cartRepo } from "../repository/cart.repo";
+import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
 
@@ -47,7 +48,7 @@ router.post(
       await new CartConfirmedPublisher(natsWrapper.client).publish(cart);
       await session.commitTransaction();
 
-      const preparedCart = await prepareCart(cart);
+      const preparedCart = await migrateProducts(cart);
 
       res.status(StatusCodes.OK).send({ data: preparedCart });
     } catch (error: any) {
