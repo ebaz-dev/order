@@ -62,7 +62,7 @@ const orderProductSchema = new Schema<OrderProductDoc>(
     inCase: {
       type: Number,
       required: false,
-    }, 
+    },
     thirdPartyData: [{
       customerId: {
         type: Schema.Types.ObjectId,
@@ -89,6 +89,7 @@ interface OrderDoc extends Document {
   orderedAt: Date;
   deliveryDate: Date;
   paymentMethod: PaymentMethods;
+  thirdPartyId: string;
 }
 
 const orderSchema = new Schema<OrderDoc>(
@@ -123,6 +124,7 @@ const orderSchema = new Schema<OrderDoc>(
       type: String, enum: Object.values(PaymentMethods),
       required: false,
     },
+    thirdPartyId: { type: String, required: false }
   },
   {
     timestamps: true,
