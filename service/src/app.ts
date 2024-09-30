@@ -20,7 +20,6 @@ import { templateCreateRouter } from "./routes/template-create";
 import { templateUpdateRouter } from "./routes/template-update";
 import { templateGetRouter } from "./routes/template-get";
 import { templateListRouter } from "./routes/template-list";
-import { healthRouter } from "./routes/health";
 dotenv.config();
 
 const apiPrefix = "/api/v1/order";
@@ -52,7 +51,6 @@ app.use(apiPrefix, templateCreateRouter);
 app.use(apiPrefix, templateUpdateRouter);
 app.use(apiPrefix, templateGetRouter);
 app.use(apiPrefix, templateListRouter);
-app.use(apiPrefix, healthRouter);
 
 app.all("*", async () => {
   throw new NotFoundError();

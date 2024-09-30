@@ -29,21 +29,11 @@ const start = async () => {
     throw new Error("NATS_CLUSTER_ID must be defined");
   }
 
-  if (!process.env.NATS_USER) {
-    throw new Error("NATS_USER must be defined");
-  }
-
-  if (!process.env.NATS_PASS) {
-    throw new Error("NATS_PASS must be defined");
-  }
-
   try {
     await natsWrapper.connect(
       process.env.NATS_CLUSTER_ID,
       process.env.NATS_CLIENT_ID,
-      process.env.NATS_URL,
-      process.env.NATS_USER,
-      process.env.NATS_PASS
+      process.env.NATS_URL
     );
     natsWrapper.client.on("close", () => {
       console.log("NATS connection closed!");

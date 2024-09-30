@@ -10,6 +10,12 @@ export enum OrderStatus {
   Cancelled = "cancelled",
 }
 
+export enum PaymentMethods {
+  Cash = "cash",
+  QPay = "qpay",
+  MBank = "mbank",
+}
+
 interface OrderProductDoc extends Document {
   id: Types.ObjectId;
   name: string;
@@ -70,7 +76,7 @@ interface OrderDoc extends Document {
   products: OrderProductDoc[];
   orderedAt: Date;
   deliveryDate: Date;
-  paymentMethod: string;
+  paymentMethod: PaymentMethods;
 }
 
 const orderSchema = new Schema<OrderDoc>(
@@ -101,7 +107,7 @@ const orderSchema = new Schema<OrderDoc>(
     orderedAt: Date,
     deliveryDate: Date,
     paymentMethod: {
-      type: String,
+      type: String, enum: Object.values(PaymentMethods),
       required: false,
     },
   },

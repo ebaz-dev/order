@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
 import { orderRepo } from "../repository/order.repo";
+import { OrderStatus, PaymentMethods } from "../shared";
 
 const router = express.Router();
 
@@ -23,9 +24,20 @@ router.get(
     }
     if (query.status) {
       criteria.status = query.status;
+
+      if (query.status === "pending") {
+        criteria.status = OrderStatus.Created;
+        criteria.paymentMethod = PaymentMethods.Cash;
+      } else if (query.status === "paymentPending") {
+        criteria.status = OrderStatus.Created;
+        criteria.paymentMethod = { $ne: PaymentMethods.Cash };
+      }
     }
     if (query.orderNo) {
       criteria.orderNo = query.orderNo;
+    }
+    if (query.paymentMethod) {
+      criteria.paymentMethod = query.paymentMethod;
     }
     if (query.startDate) {
       criteria["createdAt"] = { $gte: new Date(query.startDate) };
