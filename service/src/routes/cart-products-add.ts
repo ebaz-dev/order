@@ -80,4 +80,4 @@ router.post(
   }
 );
 
-export { router as cartProductAddRouter };
+export { router as cartProductsAddRouter };
