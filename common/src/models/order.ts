@@ -26,6 +26,7 @@ interface OrderProductDoc extends Document {
   quantity: number;
   giftQuantity?: number;
   inCase?: number;
+  thirdPartyData: { customerId: Types.ObjectId, productId: number }[]
 }
 const orderProductSchema = new Schema<OrderProductDoc>(
   {
@@ -61,7 +62,17 @@ const orderProductSchema = new Schema<OrderProductDoc>(
     inCase: {
       type: Number,
       required: false,
-    },
+    }, 
+    thirdPartyData: [{
+      customerId: {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: "Customer",
+      }, productId: {
+        type: Number,
+        required: false,
+      },
+    }]
   },
   { _id: false }
 );

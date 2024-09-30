@@ -87,7 +87,7 @@ router.post(
           quantity: data.quantity,
         });
       }
-
+      cart.status = CartStatus.Created;
       await cart.save({ session });
 
       // await new CartProductAddedPublisher(natsWrapper.client).publish({
