@@ -62,6 +62,6 @@ const prepareTemplate = async (
   const products = await Promise.all(promises);
   const merchant = await Customer.findById(merchantId);
   const supplier = await Customer.findById(template.supplierId);
-  return { id: template.id, products, merchant: { id: merchant?.id, name: merchant?.name }, supplier: { id: supplier?.id, name: supplier?.name }, name: template.name, image: template.image, color: template.color }
+  return { id: template.id, products, type: template.type, merchant: { id: merchant?.id, name: merchant?.name }, supplier: { id: supplier?.id, name: supplier?.name }, name: template.name, image: template.image, color: template.color }
 };
 export { router as templateGetRouter, prepareTemplate };
