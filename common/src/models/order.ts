@@ -26,7 +26,8 @@ interface OrderProductDoc extends Document {
   quantity: number;
   giftQuantity?: number;
   inCase?: number;
-  thirdPartyData: { customerId: Types.ObjectId, productId: number }[]
+  thirdPartyData: { customerId: Types.ObjectId, productId: number }[],
+  promoId: number;
 }
 const orderProductSchema = new Schema<OrderProductDoc>(
   {
@@ -72,7 +73,11 @@ const orderProductSchema = new Schema<OrderProductDoc>(
         type: Number,
         required: false,
       },
-    }]
+    }],
+    promoId: {
+      type: Number,
+      required: false,
+    },
   },
   { _id: false }
 );
