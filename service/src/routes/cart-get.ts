@@ -15,7 +15,8 @@ const router = express.Router();
 router.get(
   "/cart/get",
   [query("id").notEmpty().isString().withMessage("ID is required")],
-  currentUser, requireAuth,
+  currentUser,
+  requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
     const cart = await cartRepo.selectOne({ _id: req.query.id });
@@ -28,15 +29,16 @@ router.get(
   }
 );
 
-const prepareCart = async (
-  cart: CartDoc
-): Promise<any> => {
+const prepareCart = async (cart: CartDoc): Promise<any> => {
   const promises = _.map(cart.products, async (product, i) => {
     await Inventory.find({ totalStock: 100 });
     await Promo.findOne({});
     const productPrice = await Product.findOneWithAdjustedPrice({
       query: { _id: product.id },
-      merchant: { merchantId: cart.merchantId, businessTypeId: cart.merchantId },
+      merchant: {
+        merchantId: cart.merchantId,
+        businessTypeId: cart.merchantId,
+      },
     });
 
     const price = productPrice._adjustedPrice
@@ -54,12 +56,19 @@ const prepareCart = async (
       giftQuantity: 0,
       totalPrice: product.quantity * price,
       stock: productPrice.inventory?.availableStock,
-      inCase: productPrice.inCase
+      inCase: productPrice.inCase,
     };
   });
   const products = await Promise.all(promises);
   const merchant = await Customer.findById(cart.merchantId);
   const supplier = await Customer.findById(cart.supplierId);
-  return { id: cart.id, status: cart.status, userId: cart.userId, products, merchant: { id: merchant?.id, name: merchant?.name }, supplier: { id: supplier?.id, name: supplier?.name } }
+  return {
+    id: cart.id,
+    status: cart.status,
+    userId: cart.userId,
+    products,
+    merchant: { id: merchant?.id, name: merchant?.name },
+    supplier: { id: supplier?.id, name: supplier?.name },
+  };
 };
 export { router as cartGetRouter, prepareCart };

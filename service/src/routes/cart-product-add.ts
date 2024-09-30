@@ -9,7 +9,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose, { Types } from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { CartDoc, CartProductDoc, CartStatus } from "../shared";
+import { Cart, CartDoc, CartProductDoc, CartStatus } from "../shared";
 import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
 import _ from "lodash";
 import { prepareCart } from "./cart-get";
@@ -33,61 +33,73 @@ router.post(
       .isString()
       .withMessage("Product ID is required"),
     body("quantity").notEmpty().isNumeric().withMessage("Quantity is required"),
-  ], currentUser, requireAuth,
+  ],
+  currentUser,
+  requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    const { supplierId, merchantId, quantity, productId } = req.body;
+    const userId = req.currentUser?.id;
+
     const data = req.body;
+    const session = await mongoose.startSession();
 
     try {
-      let cart = await cartRepo.selectOne({
-        supplierId: data.supplierId,
-        merchantId: data.merchantId,
-        userId: req.currentUser?.id,
-        status: { $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned] }
-      });
-      let quantity = data.quantity;
-      if (cart) {
-        if (cart.status === CartStatus.Pending) {
-          throw new Error("Processing cart to order!");
-        }
-        let index = -1;
-        cart.products.forEach((product, i) => {
-          if (product.id.toString() === data.productId) {
-            index = i;
-            quantity += product.quantity;
-          }
-        });
-        if (index > -1) {
-          if (quantity > 0) {
-            cart.products[index].quantity = quantity;
-          } else {
-            cart.products.splice(index, 1)
-          }
-        } else if (index < 0 && quantity > 0) {
-          cart.products.push(<CartProductDoc>{
-            id: data.productId,
-            quantity: data.quantity
-          })
-        }
-        await cart.save()
-      } else {
-        cart = await cartRepo.create(<CartDoc>{
+      session.startTransaction();
+
+      let cart = await Cart.findOne({
+        supplierId,
+        merchantId,
+        userId,
+        status: {
+          $in: [CartStatus.Created, CartStatus.Pending, CartStatus.Returned],
+        },
+      }).session(session);
+
+      if (!cart) {
+        cart = new Cart({
           status: CartStatus.Created,
-          supplierId: data.supplierId,
-          merchantId: data.merchantId,
-          userId: new Types.ObjectId(req.currentUser?.id),
-          products: quantity > 0 ? [<CartProductDoc>{ id: data.productId, quantity: data.quantity }] : [],
+          supplierId,
+          merchantId,
+          userId: userId,
+          products: [<CartProductDoc>{ id: data.productId, quantity: 0 }],
         });
       }
 
-      await new CartProductAddedPublisher(natsWrapper.client).publish({
-        id: cart.id,
-        productId: data.productId,
-        quantity: data.quantity,
-        updatedAt: new Date(),
-      });
+      if (cart && cart.status === CartStatus.Pending) {
+        throw new BadRequestError("Card is waiting for inventory response");
+      }
+
+      const productIndex = cart.products.findIndex(
+        (product: any) => product.id.toString() === productId
+      );
+
+      if (productIndex !== -1) {
+        // Update quantity if the product exists
+        cart.products[productIndex].quantity += quantity;
+
+        // Remove product if quantity is zero or less
+        if (cart.products[productIndex].quantity <= 0) {
+          cart.products.splice(productIndex, 1);
+        }
+      }
+
+      if (productIndex === -1) {
+        cart.products.push(<CartProductDoc>{
+          id: data.productId,
+          quantity: data.quantity,
+        });
+      }
+
+      await cart.save({ session });
+
+      // await new CartProductAddedPublisher(natsWrapper.client).publish({
+      //   id: cart.id,
+      //   productId: data.productId,
+      //   quantity: data.quantity,
+      //   updatedAt: new Date(),
+      // });
+
       cart = await prepareCart(cart);
       await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: cart });
