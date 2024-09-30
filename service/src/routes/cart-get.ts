@@ -32,7 +32,7 @@ const prepareCart = async (
   cart: CartDoc
 ): Promise<any> => {
   const promises = _.map(cart.products, async (product, i) => {
-    await Inventory.find({ totalStock: 100 });
+    await Inventory.findOne({});
     await Promo.findOne({});
     const productPrice = await Product.findOneWithAdjustedPrice({
       query: { _id: product.id },
@@ -54,7 +54,8 @@ const prepareCart = async (
       giftQuantity: 0,
       totalPrice: product.quantity * price,
       stock: productPrice.inventory?.availableStock,
-      inCase: productPrice.inCase
+      inCase: productPrice.inCase,
+      productPrice
     };
   });
   const products = await Promise.all(promises);
