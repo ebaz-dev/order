@@ -1,5 +1,6 @@
 import { Document, Schema, Types, model } from "mongoose";
 import { updateIfCurrentPlugin } from "mongoose-update-if-current";
+import { Counter } from "./counter";
 
 export enum OrderStatus {
   Created = "created",
@@ -60,7 +61,7 @@ const orderProductSchema = new Schema<OrderProductDoc>(
 );
 
 interface OrderDoc extends Document {
-  orderNo?: string;
+  orderNo?: number;
   status: OrderStatus;
   supplierId: Types.ObjectId;
   merchantId: Types.ObjectId;
@@ -74,7 +75,7 @@ interface OrderDoc extends Document {
 
 const orderSchema = new Schema<OrderDoc>(
   {
-    orderNo: { type: String, required: false },
+    orderNo: { type: Number, required: false },
     status: { type: String, enum: Object.values(OrderStatus), required: true },
     supplierId: {
       type: Schema.Types.ObjectId,
@@ -117,6 +118,15 @@ const orderSchema = new Schema<OrderDoc>(
 
 orderSchema.set("versionKey", "version");
 orderSchema.plugin(updateIfCurrentPlugin);
+
+orderSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const orderNoCounter = await Counter.findByIdAndUpdate({ _id: "orderNo" }, { $inc: { seq: 1 } });
+    this.orderNo = orderNoCounter?.seq;
+  }
+  next();
+});
+
 
 const Order = model<OrderDoc>("Order", orderSchema);
 
