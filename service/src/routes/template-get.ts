@@ -36,28 +36,33 @@ const prepareTemplate = async (
   const promises = _.map(template.products, async (product, i) => {
     await Inventory.find({ totalStock: 100 });
     await Promo.findOne({});
-    const productPrice = await Product.findOneWithAdjustedPrice({
-      query: { _id: product.id },
-      merchant: { merchantId: merchantId, businessTypeId: merchantId },
-    });
+    try {
 
-    const price = productPrice._adjustedPrice
-      ? productPrice._adjustedPrice.price + productPrice._adjustedPrice.cost
-      : 0;
+      const productPrice = await Product.findOneWithAdjustedPrice({
+        query: { _id: new Types.ObjectId(product.id) },
+        merchant: { merchantId: merchantId, businessTypeId: merchantId },
+      });
 
-    return {
-      id: product.id,
-      name: productPrice.name,
-      images: productPrice.images,
-      description: productPrice.description,
-      quantity: product.quantity,
-      basePrice: price,
-      price,
-      giftQuantity: 0,
-      totalPrice: product.quantity * price,
-      stock: productPrice.inventory?.availableStock,
-      inCase: productPrice.inCase
-    };
+      const price = productPrice._adjustedPrice
+        ? productPrice._adjustedPrice.price + productPrice._adjustedPrice.cost
+        : 0;
+
+      return {
+        id: product.id,
+        name: productPrice.name,
+        images: productPrice.images,
+        description: productPrice.description,
+        quantity: product.quantity,
+        basePrice: price,
+        price,
+        giftQuantity: 0,
+        totalPrice: product.quantity * price,
+        stock: productPrice.inventory?.availableStock,
+        inCase: productPrice.inCase
+      };
+    } catch (error) {
+      return product
+    }
   });
   const products = await Promise.all(promises);
   const merchant = await Customer.findById(merchantId);
