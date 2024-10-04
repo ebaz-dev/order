@@ -3,12 +3,11 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { OrderTemplateDoc } from "../shared";
+import { OrderTemplate, OrderTemplateDoc } from "../shared";
 import { Product } from "@ebazdev/product";
 import { Customer } from "@ebazdev/customer";
 import { Inventory } from "@ebazdev/inventory";
 import { Promo } from "@ebazdev/product/build/models/promo";
-import { orderTemplateRepo } from "../repository/order-template.repo";
 import { Types } from "mongoose";
 
 const router = express.Router();
@@ -20,7 +19,7 @@ router.get(
   currentUser, requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const orderTemplate = await orderTemplateRepo.selectOne({ _id: req.query.id });
+    const orderTemplate = await OrderTemplate.findById(req.query.id);
     if (orderTemplate) {
       const data = await prepareTemplate(orderTemplate, req.body.merchantId);
       res.status(StatusCodes.OK).send({ data });

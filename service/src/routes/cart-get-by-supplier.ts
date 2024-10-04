@@ -4,7 +4,6 @@ import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import { Cart, CartStatus } from "../shared";
-import { cartRepo } from "../repository/cart.repo";
 import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();

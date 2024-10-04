@@ -1,10 +1,9 @@
 import express, { Request, Response } from "express";
-import { currentUser, QueryOptions, requireAuth, validateRequest } from "@ebazdev/core";
+import { currentUser, QueryOptions, requireAuth, validateRequest, listAndCount } from "@ebazdev/core";
 import { StatusCodes } from "http-status-codes";
-import { CartStatus } from "../shared";
+import { Cart, CartDoc, CartStatus } from "../shared";
 import { query } from "express-validator";
 import _ from "lodash";
-import { cartRepo } from "../repository/cart.repo";
 import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
@@ -32,10 +31,10 @@ router.get(
     const options: QueryOptions = <QueryOptions>req.query;
     options.sortBy = "updatedAt";
     options.sortDir = -1;
-    const result = await cartRepo.selectAndCountAll(criteria, options);
+    const result = await listAndCount(criteria, Cart, options);
 
     const promises = _.map(result.data, async (cart) => {
-      return migrateProducts(cart);
+      return migrateProducts(<CartDoc>cart);
     });
     const data = await Promise.all(promises);
 

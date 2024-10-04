@@ -3,9 +3,9 @@ import {
   Product,
   ProductDoc,
 } from "@ebazdev/product";
-import { CartDoc, CartProductDoc } from "../shared";
+import { CartDoc } from "../shared";
 import { Types } from "mongoose";
-import { Customer, HoldingSupplierCodes, Merchant, Supplier } from "@ebazdev/customer";
+import { HoldingSupplierCodes, Merchant, Supplier } from "@ebazdev/customer";
 
 export const migrateProducts = async (cart: CartDoc): Promise<any> => {
   const idsArray: string[] = cart.products.map((item) => item.id.toString());
@@ -31,7 +31,7 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
       },
     });
 
-  const products = cart.products.map((item) => {
+  let products = cart.products.map((item) => {
     const foundProduct = result.products.find(
       (product: ProductDoc) => product.id.toString() === item.id.toString()
     );
@@ -71,14 +71,32 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
   if (tradeshop) {
     promos.map((promo: any) => {
       if (promo.tradeshops.indexOf(tradeshop.tsId) !== -1) {
-        let includedQuantity = 0;
-        products.map((product: any) => {
-          if (promo.products.indexOf(product.id) !== -1) {
-            includedQuantity += product.quantity;
+        if (promo.promoType = "x+y") {
+          let includedQuantity = 0;
+          products.map((product: any) => {
+            if (promo.products.indexOf(product.id) !== -1) {
+              includedQuantity += product.quantity;
+            }
+          });
+          if (promo.thresholdQuantity <= includedQuantity) {
+            giftProducts.push({ id: promo.giftProducts[0], quantity: promo.giftQuantity * Math.floor(Number(includedQuantity) / Number(promo.thresholdQuantity)), promoId: promo.thirdPartyData.thirdPartyPromoId })
           }
-        });
-        if (promo.thresholdQuantity <= includedQuantity) {
-          giftProducts.push({ id: promo.giftProducts[0], quantity: promo.giftQuantity * Math.floor(Number(includedQuantity) / Number(promo.thresholdQuantity)), promoId: promo.thirdPartyData.thirdPartyPromoId })
+        } else if (promo.promoType = "z>x%") {
+          let includedQuantity = 0;
+          const newProducts = products.map((product: any) => {
+            if (promo.products.indexOf(product.id) !== -1) {
+              includedQuantity += product.quantity;
+              const discount = product.basePrice / 100 * promo.promopercent;
+              if (product.price > (product.basePrice - discount)) {
+                product.price = product.basePrice - discount;
+                product.promoId = promo.thirdPartyData.thirdPartyPromoId;
+              }
+            }
+            return product;
+          });
+          if (promo.thresholdQuantity <= includedQuantity) {
+            products = newProducts
+          }
         }
       }
 
@@ -141,3 +159,23 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
     supplier: { id: supplier?.id, name: supplier?.name },
   };
 };
+
+// const calculatePromo = async (cart: any, promos: any, tradeshop: any, products: any[]): Promise<any> => {
+//   let giftProducts: any = [];
+
+//   promos.map((promo: any) => {
+//     if(promo.)
+//     if (promo.tradeshops.indexOf(tradeshop.tsId) !== -1) {
+//       let includedQuantity = 0;
+//       products.map((product: any) => {
+//         if (promo.products.indexOf(product.id) !== -1) {
+//           includedQuantity += product.quantity;
+//         }
+//       });
+//       if (promo.thresholdQuantity <= includedQuantity) {
+//         giftProducts.push({ id: promo.giftProducts[0], quantity: promo.giftQuantity * Math.floor(Number(includedQuantity) / Number(promo.thresholdQuantity)), promoId: promo.thirdPartyData.thirdPartyPromoId })
+//       }
+//     }
+
+//   })
+// }

@@ -8,8 +8,7 @@ import {
 import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import { orderTemplateRepo } from "../repository/order-template.repo";
-import { OrderTemplateDoc } from "../shared";
+import { OrderTemplate, OrderTemplateDoc } from "../shared";
 
 const router = express.Router();
 
@@ -30,9 +29,9 @@ router.post(
     validateRequest,
     async (req: Request, res: Response) => {
         const session = await mongoose.startSession();
-        session.startTransaction();
         try {
-            const orderTemplate = await orderTemplateRepo.create(<OrderTemplateDoc>req.body);
+            session.startTransaction();
+            const orderTemplate = await OrderTemplate.create(<OrderTemplateDoc>req.body);
             await session.commitTransaction();
             res.status(StatusCodes.CREATED).send(orderTemplate);
         } catch (error: any) {

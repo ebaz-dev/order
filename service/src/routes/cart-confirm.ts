@@ -10,10 +10,8 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { CartStatus } from "../shared";
+import { Cart, CartStatus } from "../shared";
 import { CartConfirmedPublisher } from "../events/publisher/cart-confirmed-publisher";
-import { prepareCart } from "./cart-get";
-import { cartRepo } from "../repository/cart.repo";
 import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
@@ -30,7 +28,7 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const cart = await cartRepo.selectOne({
+      const cart = await Cart.findOne({
         supplierId: req.body.supplierId,
         merchantId: req.body.merchantId,
         status: { $in: [CartStatus.Created, CartStatus.Returned] }

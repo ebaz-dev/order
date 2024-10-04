@@ -8,7 +8,7 @@ import {
 import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose, { Types } from "mongoose";
-import { Cart, CartDoc, CartProductDoc, CartStatus } from "../shared";
+import { Cart, CartProductDoc, CartStatus } from "../shared";
 import _ from "lodash";
 import { migrateProducts } from "../utils/migrateProducts";
 

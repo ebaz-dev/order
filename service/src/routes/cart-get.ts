@@ -3,12 +3,11 @@ import express, { Request, Response } from "express";
 import { currentUser, requireAuth, validateRequest } from "@ebazdev/core";
 import { query } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { CartDoc } from "../shared";
+import { Cart, CartDoc } from "../shared";
 import { Product } from "@ebazdev/product";
 import { Customer } from "@ebazdev/customer";
 import { Inventory } from "@ebazdev/inventory";
 import { Promo } from "@ebazdev/product/build/models/promo";
-import { cartRepo } from "../repository/cart.repo";
 import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
@@ -20,7 +19,7 @@ router.get(
   requireAuth,
   validateRequest,
   async (req: Request, res: Response) => {
-    const cart = await cartRepo.selectOne({ _id: req.query.id });
+    const cart = await Cart.findOne({ _id: req.query.id });
     if (cart) {
       const data = await migrateProducts(cart);
       res.status(StatusCodes.OK).send({ data });

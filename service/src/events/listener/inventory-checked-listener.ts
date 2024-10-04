@@ -4,13 +4,11 @@ import {
   OrderInventoryEventSubjects, CartInventoryCheckedEvent
 } from "@ebazdev/inventory";
 import { queueGroupName } from "./queue-group-name";
-import { CartStatus, OrderDoc, OrderProductDoc, OrderStatus } from "../../shared";
+import { Cart, CartStatus, Order, OrderDoc, OrderProductDoc, OrderStatus } from "../../shared";
 import { natsWrapper } from "../../nats-wrapper";
 import { OrderCreatedPublisher } from "../publisher/order-created-publisher";
 import { Product } from "@ebazdev/product";
 import _ from "lodash";
-import { cartRepo } from "../../repository/cart.repo";
-import { orderRepo } from "../../repository/order.repo";
 import { migrateProducts } from "../../utils/migrateProducts";
 
 export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedEvent> {
@@ -21,7 +19,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
     try {
       const { cartId, status, insufficientProducts } = data;
 
-      const cart = await cartRepo.findById(cartId);
+      const cart = await Cart.findById(cartId);
 
       if (!cart) {
         throw new Error("Cart not found");
@@ -29,7 +27,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
 
       if (status === "confirmed") {
         const data = await migrateProducts(cart);
-        const order = await orderRepo.create(<OrderDoc>{
+        const order = await Order.create(<OrderDoc>{
           status: OrderStatus.Created,
           supplierId: cart.supplierId,
           merchantId: cart.merchantId,
@@ -38,7 +36,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           orderedAt: new Date(),
           deliveryDate: cart.deliveryDate,
           products: data.products
-        })
+        });
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);

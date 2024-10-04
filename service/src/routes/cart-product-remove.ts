@@ -9,10 +9,8 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { CartStatus } from "../shared";
+import { Cart, CartStatus } from "../shared";
 import { CartProductRemovedPublisher } from "../events/publisher/cart-product-removed-publisher";
-import { cartRepo } from "../repository/cart.repo";
-
 const router = express.Router();
 
 router.post(
@@ -30,21 +28,17 @@ router.post(
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      await cartRepo.updateOne(
-        {
-          condition: {
-            supplierId: req.body.supplierId,
-            merchantId: req.body.merchantId,
-            status: { $in: [CartStatus.Created, CartStatus.Returned] }, "products.id": req.body.productId
+      await Cart.updateOne({
+        supplierId: req.body.supplierId,
+        merchantId: req.body.merchantId,
+        status: { $in: [CartStatus.Created, CartStatus.Returned] }, "products.id": req.body.productId
+      }, {
+        $pull: {
+          products: {
+            id: req.body.productId,
           },
-          data: {
-            $pull: {
-              products: {
-                id: req.body.productId,
-              },
-            },
-          }
-        }
+        },
+      }
       );
       await new CartProductRemovedPublisher(natsWrapper.client).publish({
         supplierId: req.body.supplierId,

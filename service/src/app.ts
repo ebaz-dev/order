@@ -22,6 +22,7 @@ import { templateGetRouter } from "./routes/template-get";
 import { templateListRouter } from "./routes/template-list";
 import { cartProductsAddRouter } from "./routes/cart-products-add";
 import { healthRouter } from "./routes/health";
+import { orderBoListRouter } from "./routes/backoffice/list";
 dotenv.config();
 
 const apiPrefix = "/api/v1/order";
@@ -55,6 +56,7 @@ app.use(apiPrefix, templateCreateRouter);
 app.use(apiPrefix, templateUpdateRouter);
 app.use(apiPrefix, templateGetRouter);
 app.use(apiPrefix, templateListRouter);
+app.use(apiPrefix, orderBoListRouter);
 
 app.all("*", async () => {
   throw new NotFoundError();

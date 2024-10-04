@@ -9,11 +9,9 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose, { Types } from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { CartDoc, CartStatus } from "../shared";
+import { Cart, CartDoc, CartStatus } from "../shared";
 import { CartProductAddedPublisher } from "../events/publisher/cart-product-added-publisher";
 import _ from "lodash";
-import { prepareCart } from "./cart-get";
-import { cartRepo } from "../repository/cart.repo";
 import { migrateProducts } from "../utils/migrateProducts";
 
 const router = express.Router();
@@ -40,7 +38,7 @@ router.post(
     const data = req.body;
 
     try {
-      let cart = await cartRepo.selectOne({
+      let cart = await Cart.findOne({
         supplierId: data.supplierId,
         merchantId: data.merchantId,
         userId: req.currentUser?.id,
@@ -55,7 +53,7 @@ router.post(
         cart.products = data.products;
         await cart.save();
       } else {
-        cart = await cartRepo.create(<CartDoc>{
+        cart = await Cart.create(<CartDoc>{
           status: CartStatus.Created,
           supplierId: data.supplierId,
           merchantId: data.merchantId,

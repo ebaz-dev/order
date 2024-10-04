@@ -4,11 +4,10 @@ import {
     InvoicePaidEvent, InvoiceEventSubjects
 } from "@ebazdev/payment";
 import { queueGroupName } from "./queue-group-name";
-import { OrderStatus } from "../../shared";
+import { Order, OrderStatus } from "../../shared";
 import { natsWrapper } from "../../nats-wrapper";
 import _ from "lodash";
 import { OrderConfirmedPublisher } from "../publisher/order-confirmed-publisher";
-import { orderRepo } from "../../repository/order.repo";
 
 export class InvoicePaidListener extends Listener<InvoicePaidEvent> {
     readonly subject = InvoiceEventSubjects.InvoicePaid;
@@ -16,7 +15,7 @@ export class InvoicePaidListener extends Listener<InvoicePaidEvent> {
 
     async onMessage(data: InvoicePaidEvent["data"], msg: Message) {
         try {
-            const order = await orderRepo.findById(data.orderId);
+            const order = await Order.findById(data.orderId);
             if (!order) {
                 throw new Error("Order not found");
             }
