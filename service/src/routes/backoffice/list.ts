@@ -66,7 +66,7 @@ router.get(
                 (supplier) => supplier.id.toString() === item.supplierId.toString()
             );
             return {
-                ...item.lean(),
+                ...item.toJSON(),
                 merchant,
                 supplier
             }
