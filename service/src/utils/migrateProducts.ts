@@ -157,6 +157,7 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
     giftProducts,
     merchant: { id: merchant?.id, name: merchant?.name },
     supplier: { id: supplier?.id, name: supplier?.name },
+    merchantDebt: 0
   };
 };
 

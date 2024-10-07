@@ -94,6 +94,7 @@ interface OrderDoc extends Document {
   deliveryDate: Date;
   paymentMethod: PaymentMethods;
   thirdPartyId: string;
+  merchantDebt: number;
 }
 
 const orderSchema = new Schema<OrderDoc>(
@@ -128,7 +129,11 @@ const orderSchema = new Schema<OrderDoc>(
       type: String, enum: Object.values(PaymentMethods),
       required: false,
     },
-    thirdPartyId: { type: String, required: false }
+    thirdPartyId: { type: String, required: false },
+    merchantDebt: {
+      type: Number,
+      required: false,
+    },
   },
   {
     timestamps: true,
