@@ -11,6 +11,7 @@ export * from "./events/order-create-event";
 export * from "./events/order-confirm-event";
 export * from "./events/order-deliver-event";
 export * from "./events/order-cancel-event";
+export * from "./events/order-payment-method-update-event";
 
 export * from "./models/order";
 
