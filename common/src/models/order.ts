@@ -82,7 +82,7 @@ const orderProductSchema = new Schema<OrderProductDoc>(
 );
 
 interface OrderDoc extends Document {
-  orderNo?: number;
+  orderNo?: string;
   status: OrderStatus;
   supplierId: Types.ObjectId;
   merchantId: Types.ObjectId;
@@ -98,7 +98,7 @@ interface OrderDoc extends Document {
 
 const orderSchema = new Schema<OrderDoc>(
   {
-    orderNo: { type: Number, required: false },
+    orderNo: { type: String, required: false },
     status: { type: String, enum: Object.values(OrderStatus), required: true },
     supplierId: {
       type: Schema.Types.ObjectId,
