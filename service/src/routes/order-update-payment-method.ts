@@ -10,7 +10,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { OrderPaymentMethodUpdatedPublisher } from "../events/publisher/order-delivered-publisher copy";
+import { OrderPaymentMethodUpdatedPublisher } from "../events/publisher/order-payment-method-updated-publisher";
 import { Order } from "../shared";
 
 const router = express.Router();
