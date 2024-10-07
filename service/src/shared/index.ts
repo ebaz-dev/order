@@ -15,3 +15,5 @@ export * from "./events/order-cancel-event";
 export * from "./models/order";
 
 export * from "./models/order-template";
+
+export * from "./models/sequence";

@@ -10,6 +10,7 @@ import { OrderCreatedPublisher } from "../publisher/order-created-publisher";
 import { Product } from "@ebazdev/product";
 import _ from "lodash";
 import { migrateProducts } from "../../utils/migrateProducts";
+import { getOrderNumber } from "../../utils/order-number";
 
 export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedEvent> {
   readonly subject = OrderInventoryEventSubjects.CartInventoryChecked;
@@ -27,6 +28,8 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
 
       if (status === "confirmed") {
         const data = await migrateProducts(cart);
+        const orderNo = await getOrderNumber(cart.supplierId.toString());
+
         const order = await Order.create(<OrderDoc>{
           status: OrderStatus.Created,
           supplierId: cart.supplierId,
@@ -35,7 +38,8 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           cartId: cart.id,
           orderedAt: new Date(),
           deliveryDate: cart.deliveryDate,
-          products: data.products
+          products: data.products,
+          orderNo
         });
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
         await cart.save();
