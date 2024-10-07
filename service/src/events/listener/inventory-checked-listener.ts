@@ -39,6 +39,7 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           orderedAt: new Date(),
           deliveryDate: cart.deliveryDate,
           products: data.products,
+          giftProducts: data.giftProducts,
           orderNo
         });
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
