@@ -29,6 +29,7 @@ export class ColaOrderStatusReceivedListener extends Listener<ColaOrderStatusRec
       msg.ack();
     } catch (error) {
       console.error("Error processing OrderstatusRecieved:", error);
+      msg.ack();
     }
   }
 }

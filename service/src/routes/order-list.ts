@@ -32,8 +32,11 @@ router.get(
         criteria.paymentMethod = { $ne: PaymentMethods.Cash };
       }
     }
-    if (query.orderNo) {
-      criteria.orderNo = query.orderNo;
+    if (req.query.orderNo) {
+      criteria.orderNo = {
+        $regex: req.query.orderNo,
+        $options: "i",
+      };
     }
     if (query.paymentMethod) {
       criteria.paymentMethod = query.paymentMethod;
