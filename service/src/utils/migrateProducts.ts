@@ -61,7 +61,7 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
   });
 
   const merchant = await Merchant.findById(cart.merchantId);
-  const tradeshop = merchant?.tradeShops?.find(ts => ts.holdingKey === HoldingSupplierCodes.CocaCola);
+  const tradeshop = merchant?.tradeShops?.find(ts => ts.holdingKey === HoldingSupplierCodes.CocaCola || ts.holdingKey === HoldingSupplierCodes.TotalDistribution);
   const supplier = await Supplier.findById(cart.supplierId);
 
   // Processing promo products
