@@ -15,6 +15,20 @@ export enum PaymentMethods {
   MBank = "mbank",
 }
 
+export enum OrderLogType {
+  Status = "status",
+  Payment = "payment",
+  Supplier = "supplier"
+}
+
+export enum OrderActions {
+  Create = "create",
+  Update = "update",
+  Confirm = "confirm",
+  Deliver = "deliver",
+  Cancel = "cancel"
+}
+
 interface OrderProductDoc extends Document {
   id: Types.ObjectId;
   name: string;
@@ -81,6 +95,45 @@ const orderProductSchema = new Schema<OrderProductDoc>(
   { _id: false }
 );
 
+interface OrderLogDoc extends Document {
+  userId?: Types.ObjectId;
+  type: OrderLogType;
+  action: OrderActions;
+  fields: { key: string, oldValue: string, newValue: string }[];
+  description?: string;
+}
+
+const orderLogSchema = new Schema<OrderLogDoc>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      required: false,
+      ref: "User",
+    },
+    type: { type: String, enum: Object.values(OrderLogType), required: true },
+    action: { type: String, enum: Object.values(OrderActions), required: true },
+    fields: [{
+      key: String,
+      oldValue: String,
+      newValue: String
+    }],
+
+    description: {
+      type: String,
+      required: false,
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+  }
+);
+
 interface OrderDoc extends Document {
   orderNo?: string;
   status: OrderStatus;
@@ -95,6 +148,7 @@ interface OrderDoc extends Document {
   paymentMethod: PaymentMethods;
   thirdPartyId: string;
   merchantDebt: number;
+  logs: OrderLogDoc[];
 }
 
 const orderSchema = new Schema<OrderDoc>(
@@ -134,6 +188,7 @@ const orderSchema = new Schema<OrderDoc>(
       type: Number,
       required: false,
     },
+    logs: [orderLogSchema],
   },
   {
     timestamps: true,
@@ -151,4 +206,4 @@ orderSchema.plugin(updateIfCurrentPlugin);
 
 const Order = model<OrderDoc>("Order", orderSchema);
 
-export { OrderDoc, Order, OrderProductDoc };
+export { OrderDoc, Order, OrderProductDoc, OrderLogDoc };

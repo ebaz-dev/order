@@ -10,7 +10,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Order, OrderStatus } from "../shared";
+import { Order, OrderActions, OrderLogDoc, OrderLogType, OrderStatus } from "../shared";
 import { OrderDeliveredPublisher } from "../events/publisher/order-delivered-publisher";
 
 const router = express.Router();
@@ -33,6 +33,8 @@ router.post(
         throw new NotFoundError();
       }
       order.status = OrderStatus.Delivered;
+      order.logs.push(<OrderLogDoc>{ userId: req.currentUser?.id, type: OrderLogType.Status, action: OrderActions.Deliver });
+      await order.save();
       await new OrderDeliveredPublisher(natsWrapper.client).publish(order);
       await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: order });

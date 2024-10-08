@@ -4,13 +4,14 @@ import {
   OrderInventoryEventSubjects, CartInventoryCheckedEvent
 } from "@ebazdev/inventory";
 import { queueGroupName } from "./queue-group-name";
-import { Cart, CartStatus, Order, OrderDoc, OrderProductDoc, OrderStatus } from "../../shared";
+import { Cart, CartStatus, Order, OrderActions, OrderDoc, OrderLogDoc, OrderLogType, OrderProductDoc, OrderStatus } from "../../shared";
 import { natsWrapper } from "../../nats-wrapper";
 import { OrderCreatedPublisher } from "../publisher/order-created-publisher";
 import { Product } from "@ebazdev/product";
 import _ from "lodash";
 import { migrateProducts } from "../../utils/migrateProducts";
 import { getOrderNumber } from "../../utils/order-number";
+import { Types } from "mongoose";
 
 export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedEvent> {
   readonly subject = OrderInventoryEventSubjects.CartInventoryChecked;
@@ -40,9 +41,11 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           deliveryDate: cart.deliveryDate,
           products: data.products,
           giftProducts: data.giftProducts,
-          orderNo, 
+          orderNo,
           merchantDebt: data.merchantDebt
         });
+        order.logs.push(<OrderLogDoc>{ userId: cart.userId, type: OrderLogType.Status, action: OrderActions.Create });
+        await order.save();
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);

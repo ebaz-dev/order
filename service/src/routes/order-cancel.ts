@@ -10,7 +10,7 @@ import { body } from "express-validator";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
-import { Order, OrderStatus } from "../shared";
+import { Order, OrderActions, OrderLogDoc, OrderLogType, OrderStatus } from "../shared";
 import { OrderCancelledPublisher } from "../events/publisher/order-cancelled-publisher";
 
 const router = express.Router();
@@ -27,20 +27,21 @@ router.post(
     try {
       const order = await Order.findOne({
         _id: req.body.id,
-        status: OrderStatus.Confirmed,
       });
       if (!order) {
         throw new NotFoundError();
       }
       order.status = OrderStatus.Cancelled;
+      order.logs.push(<OrderLogDoc>{ userId: req.currentUser?.id, type: OrderLogType.Status, action: OrderActions.Cancel });
+      await order.save();
       await new OrderCancelledPublisher(natsWrapper.client).publish(order);
       await session.commitTransaction();
       res.status(StatusCodes.OK).send({ data: order });
     } catch (error: any) {
       await session.abortTransaction();
 
-      console.error("order deliver operation failed", error);
-      throw new BadRequestError("order deliver operation failed");
+      console.error("order cancel operation failed", error);
+      throw new BadRequestError("order cancel operation failed");
     } finally {
       session.endSession();
     }

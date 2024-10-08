@@ -11,7 +11,7 @@ import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import { natsWrapper } from "../nats-wrapper";
 import { OrderPaymentMethodUpdatedPublisher } from "../events/publisher/order-payment-method-updated-publisher";
-import { Order } from "../shared";
+import { Order, OrderActions, OrderLogDoc, OrderLogType } from "../shared";
 
 const router = express.Router();
 
@@ -30,6 +30,7 @@ router.post(
       if (!order) {
         throw new NotFoundError();
       }
+      order.logs.push(<OrderLogDoc>{ userId: req.currentUser?.id, type: OrderLogType.Payment, action: OrderActions.Update, fields: [{ key: "paymentMethod", oldValue: order.paymentMethod, newValue: req.body.paymentMethod }] });
       order.paymentMethod = req.body.paymentMethod;
       await order.save();
       await new OrderPaymentMethodUpdatedPublisher(natsWrapper.client).publish(order);

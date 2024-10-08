@@ -4,7 +4,7 @@ import {
     InvoicePaidEvent, InvoiceEventSubjects
 } from "@ebazdev/payment";
 import { queueGroupName } from "./queue-group-name";
-import { Order, OrderStatus } from "../../shared";
+import { Order, OrderActions, OrderLogDoc, OrderLogType, OrderStatus } from "../../shared";
 import { natsWrapper } from "../../nats-wrapper";
 import _ from "lodash";
 import { OrderConfirmedPublisher } from "../publisher/order-confirmed-publisher";
@@ -19,7 +19,8 @@ export class InvoicePaidListener extends Listener<InvoicePaidEvent> {
             if (!order) {
                 throw new Error("Order not found");
             }
-            order.set({ status: OrderStatus.Confirmed })
+            order.set({ status: OrderStatus.Confirmed });
+            order.logs.push(<OrderLogDoc>{ type: OrderLogType.Payment, action: OrderActions.Confirm });
             await order.save();
             await new OrderConfirmedPublisher(natsWrapper.client).publish(order);
             msg.ack();
