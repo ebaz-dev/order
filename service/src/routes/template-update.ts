@@ -27,9 +27,9 @@ router.post(
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            await OrderTemplate.updateOne({ id: req.body.id }, <OrderTemplateDoc>req.body);
+            const template = await OrderTemplate.findByIdAndUpdate(req.body.id, <OrderTemplateDoc>req.body);
             await session.commitTransaction();
-            res.status(StatusCodes.OK).send();
+            res.status(StatusCodes.OK).send({ data: template });
         } catch (error: any) {
             await session.abortTransaction();
             console.error("Order template update operation failed", error);
