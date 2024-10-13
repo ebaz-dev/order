@@ -55,14 +55,15 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
         totalPrice: item.quantity * price,
         stock: foundProduct.inventory?.availableStock,
         inCase: foundProduct.inCase,
-        thirdPartyData: foundProduct.thirdPartyData
+        thirdPartyData: foundProduct.thirdPartyData,
+        promos: foundProduct.promos
       };
     }
   });
 
   const merchant = await Merchant.findById(cart.merchantId);
-  const tradeshop = merchant?.tradeShops?.find(ts => ts.holdingKey === HoldingSupplierCodes.CocaCola || ts.holdingKey === HoldingSupplierCodes.TotalDistribution);
   const supplier = await Supplier.findById(cart.supplierId);
+  const tradeshop = merchant?.tradeShops?.find(ts => ts.holdingKey === supplier?.holdingKey);
 
   // Processing promo products
   let giftProducts: any = [];
@@ -70,8 +71,8 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
     [promo.thirdPartyData.thirdPartyPromoId, promo])).values()];
   if (tradeshop) {
     promos.map((promo: any) => {
-      if (promo.tradeshops.indexOf(tradeshop.tsId) !== -1) {
-        if (promo.promoType = "x+y") {
+      if (promo.tradeshops.indexOf(Number(tradeshop.tsId)) !== -1) {
+        if (promo.promoType === 'x+y') {
           let includedQuantity = 0;
           products.map((product: any) => {
             if (promo.products.indexOf(product.id) !== -1) {
@@ -81,12 +82,10 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
           if (promo.thresholdQuantity <= includedQuantity) {
             giftProducts.push({ id: promo.giftProducts[0], quantity: promo.giftQuantity * Math.floor(Number(includedQuantity) / Number(promo.thresholdQuantity)), promoId: promo.thirdPartyData.thirdPartyPromoId })
           }
-        } else if (promo.promoType = "z>x%") {
-          let includedQuantity = 0;
-          const newProducts = products.map((product: any) => {
-            if (promo.products.indexOf(product.id) !== -1) {
-              includedQuantity += product.quantity;
-              const discount = product.basePrice / 100 * promo.promopercent;
+        } else if (promo.promoType === 'z>x%') {
+          products.map((product: any) => {
+            if (promo.products.indexOf(product.id.toString()) !== -1) {
+              const discount = product.basePrice / 100 * promo.promoPercent;
               if (product.price > (product.basePrice - discount)) {
                 product.price = product.basePrice - discount;
                 product.promoId = promo.thirdPartyData.thirdPartyPromoId;
@@ -94,9 +93,6 @@ export const migrateProducts = async (cart: CartDoc): Promise<any> => {
             }
             return product;
           });
-          if (promo.thresholdQuantity <= includedQuantity) {
-            products = newProducts
-          }
         }
       }
 
