@@ -5,7 +5,7 @@ import {
 } from "@ebazdev/product";
 import { CartDoc } from "../shared";
 import { Types } from "mongoose";
-import { HoldingSupplierCodes, Merchant, Supplier } from "@ebazdev/customer";
+import { Merchant, Supplier } from "@ebazdev/customer";
 
 export const migrateProducts = async (cart: CartDoc): Promise<any> => {
   const idsArray: string[] = cart.products.map((item) => item.id.toString());
