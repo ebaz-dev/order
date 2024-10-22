@@ -11,7 +11,7 @@ const sequenceSchema = new Schema<SequenceDoc>(
     {
         code: { type: String, required: true },
         duration: { type: String, required: true },
-        seq: { type: Number, default: 0 }
+        seq: { type: Number, default: 1 }
     },
     {
         timestamps: true,
