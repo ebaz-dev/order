@@ -1,10 +1,22 @@
 import { Message } from "node-nats-streaming";
 import { Listener } from "@ebazdev/core";
 import {
-  OrderInventoryEventSubjects, CartInventoryCheckedEvent
+  OrderInventoryEventSubjects,
+  CartInventoryCheckedEvent,
 } from "@ebazdev/inventory";
 import { queueGroupName } from "./queue-group-name";
-import { Cart, CartStatus, Order, OrderActions, OrderDoc, OrderLogDoc, OrderLogType, OrderProductDoc, OrderStatus } from "../../shared";
+import {
+  Cart,
+  CartStatus,
+  Order,
+  OrderActions,
+  OrderDoc,
+  OrderLogDoc,
+  OrderLogType,
+  OrderProductDoc,
+  OrderStatus,
+  PaymentMethods,
+} from "../../shared";
 import { natsWrapper } from "../../nats-wrapper";
 import { OrderCreatedPublisher } from "../publisher/order-created-publisher";
 import { Product } from "@ebazdev/product";
@@ -42,17 +54,23 @@ export class CartInventoryCheckedListener extends Listener<CartInventoryCheckedE
           products: data.products,
           giftProducts: data.giftProducts,
           orderNo,
-          merchantDebt: data.merchantDebt
+          merchantDebt: data.merchantDebt,
+          paymentMethod: PaymentMethods.Cash,
         });
-        order.logs.push(<OrderLogDoc>{ userId: cart.userId, type: OrderLogType.Status, action: OrderActions.Create });
+        order.logs.push(<OrderLogDoc>{
+          userId: cart.userId,
+          type: OrderLogType.Status,
+          action: OrderActions.Create,
+        });
         await order.save();
         cart.set({ status: CartStatus.Ordered, orderedAt: new Date() });
         await cart.save();
         await new OrderCreatedPublisher(natsWrapper.client).publish(order);
       } else if (status === "cancelled") {
         cart.set({
-          status: CartStatus.Returned, returnedProducts: insufficientProducts
-        })
+          status: CartStatus.Returned,
+          returnedProducts: insufficientProducts,
+        });
         await cart.save();
       }
       msg.ack();
